@@ -3,6 +3,10 @@ import { BrowserProvider, Contract, formatEther, parseEther, isAddress } from "e
 import { contractABI, contractAddress, shortenAddress } from "../utils/constants";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Transactions component for interacting with the Ethereum blockchain.
+ * Allows users to send ETH and view transaction history.
+ */
 const Transactions = () => {
     const [currentAccount, setCurrentAccount] = useState("");
     const [formData, setFormData] = useState({ addressTo: "", amount: "", keyword: "", message: "" });
@@ -24,6 +28,10 @@ const Transactions = () => {
         }
     }, [ethereum]);
 
+    /**
+     * Creates an Ethereum contract instance.
+     * @returns {Promise<Contract|null>} The contract instance or null if ethereum object is missing.
+     */
     const createEthereumContract = useCallback(async () => {
         if (!ethereum) return null;
         const provider = new BrowserProvider(ethereum);
@@ -32,6 +40,9 @@ const Transactions = () => {
         return transactionsContract;
     }, [ethereum]);
 
+    /**
+     * Fetches all transactions from the blockchain.
+     */
     const getAllTransactions = useCallback(async () => {
         try {
             if (!ethereum) return alert("Please install MetaMask.");
@@ -55,6 +66,9 @@ const Transactions = () => {
         }
     }, [createEthereumContract, ethereum]);
 
+    /**
+     * Connects the wallet to the application.
+     */
     const connectWallet = useCallback(async () => {
         try {
             if (!ethereum) return alert("Please install MetaMask.");
@@ -66,6 +80,9 @@ const Transactions = () => {
         }
     }, [ethereum]);
 
+    /**
+     * Sends a transaction to the blockchain.
+     */
     const sendTransaction = async () => {
         const { addressTo, amount, keyword, message } = formData;
         try {
@@ -108,9 +125,15 @@ const Transactions = () => {
             getAllTransactions();
         } catch (error) {
             console.error(error);
+            setIsLoading(false);
         }
     };
 
+    /**
+     * Handles form input changes.
+     * @param {Event} e - The input change event.
+     * @param {string} name - The name of the field being changed.
+     */
     const handleChange = (e, name) => {
         setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
     };
@@ -118,7 +141,7 @@ const Transactions = () => {
     useEffect(() => {
         const init = async () => {
             try {
-                if (!ethereum) return alert("Please install MetaMask.");
+                if (!ethereum) return; // Silent return instead of alert
 
                 const accounts = await ethereum.request({ method: "eth_accounts" });
 
