@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { X, Send, Wand2 } from 'lucide-react';
 
-// ChatMessage component
+/**
+ * Component for displaying a single chat message.
+ * @param {object} props - Component props.
+ * @param {string} props.role - The role of the sender ('user' or 'assistant').
+ * @param {string} props.content - The text content of the message.
+ */
 const ChatMessage = ({ role, content }) => {
     const isUser = role === 'user';
     return (
@@ -13,7 +18,12 @@ const ChatMessage = ({ role, content }) => {
     );
 };
 
-// ChatSystemPrompt component
+/**
+ * Component for editing the system prompt.
+ * @param {object} props - Component props.
+ * @param {string} props.systemPrompt - The current system prompt.
+ * @param {function} props.setSystemPrompt - Function to update the system prompt.
+ */
 const ChatSystemPrompt = ({ systemPrompt, setSystemPrompt }) => (
     <div className="p-4 border-b border-outline-variant bg-surface-container-low">
         <label className="block text-sm font-medium text-on-surface-variant mb-1">System Prompt</label>
@@ -27,7 +37,12 @@ const ChatSystemPrompt = ({ systemPrompt, setSystemPrompt }) => (
     </div>
 );
 
-// ChatInput component
+/**
+ * Component for chat input.
+ * @param {object} props - Component props.
+ * @param {function} props.onSend - Function to call when message is sent.
+ * @param {boolean} props.disabled - Whether the input is disabled.
+ */
 const ChatInput = ({ onSend, disabled }) => {
     const [input, setInput] = useState('');
     const handleSubmit = (e) => {
@@ -53,8 +68,20 @@ const ChatInput = ({ onSend, disabled }) => {
     );
 };
 
-// Main ChatPanel component
-export const ChatPanel = ({ chatHistory, setChatHistory, systemPrompt, setSystemPrompt, memoryLimit = 20, callVeniceChat, defaultChatModel }) => {
+/**
+ * Main ChatPanel component.
+ * Manages chat history, system prompt, and interactions with the chat API.
+ *
+ * @param {object} props - Component props.
+ * @param {Array} props.chatHistory - Array of chat message objects.
+ * @param {function} props.setChatHistory - Function to update chat history.
+ * @param {string} props.systemPrompt - The system prompt string.
+ * @param {function} props.setSystemPrompt - Function to update system prompt.
+ * @param {number} [props.memoryLimit=20] - Max number of messages to keep in history.
+ * @param {function} props.callVeniceChat - Function to call the API.
+ * @param {string} props.defaultChatModel - Default model ID.
+ */
+const ChatPanel = ({ chatHistory, setChatHistory, systemPrompt, setSystemPrompt, memoryLimit = 20, callVeniceChat, defaultChatModel }) => {
     const [loading, setLoading] = useState(false);
 
     const handleSend = async (userMessage) => {
@@ -119,3 +146,5 @@ export const ChatPanel = ({ chatHistory, setChatHistory, systemPrompt, setSystem
         </div>
     );
 };
+
+export default ChatPanel;

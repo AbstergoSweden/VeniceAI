@@ -96,6 +96,9 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 │   ├── index.css
 │   ├── main.jsx
 │   ├── test
+│   │   ├── Bugs.test.jsx  # Regression tests for fixed bugs
+│   │   ├── ChatPanel.test.jsx
+│   │   ├── Transactions.test.jsx
 │   │   └── setup.js
 │   └── utils
 │       ├── api.js
@@ -284,8 +287,9 @@ npx vitest --coverage
 ### Test Files
 
 - `src/utils/api.test.js` - API utility tests
-- `src/App.repro.test.jsx` - App integration tests
-- Component tests (to be added)
+- `src/test/ChatPanel.test.jsx` - Chat component tests
+- `src/test/Transactions.test.jsx` - Transactions component tests
+- `src/test/Bugs.test.jsx` - Regression tests for reported bugs
 
 ---
 

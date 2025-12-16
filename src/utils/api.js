@@ -1,5 +1,16 @@
 import imageCache from './cache.js';
 
+/**
+ * Makes an API call with automatic key rotation, retries, and caching.
+ *
+ * @param {string} url - The URL to make the request to.
+ * @param {object} data - The data to send in the body of the request.
+ * @param {object} config - Configuration object containing API keys.
+ * @param {number} [initialKeyIndex=0] - The index of the API key to start with.
+ * @param {boolean} [isBinary=false] - Whether the expected response is binary data.
+ * @returns {Promise<any>} A promise that resolves with the response data (JSON or ArrayBuffer).
+ * @throws {Error} If all API keys fail or a non-retriable error occurs.
+ */
 export const apiCall = async (url, data, config, initialKeyIndex = 0, isBinary = false) => {
     // Check if this is an image generation request and if we have it cached
     if (url.includes('/image/generate') && data) {
@@ -11,8 +22,11 @@ export const apiCall = async (url, data, config, initialKeyIndex = 0, isBinary =
     }
 
     let lastError = null;
+    const totalKeys = config.API_KEYS.length;
 
-    for (let keyIndex = initialKeyIndex; keyIndex < config.API_KEYS.length; keyIndex++) {
+    // Loop through all keys, starting from initialKeyIndex and wrapping around
+    for (let i = 0; i < totalKeys; i++) {
+        const keyIndex = (initialKeyIndex + i) % totalKeys;
         const apiKey = config.API_KEYS[keyIndex];
         let retries = 0;
         const maxRetries = 3;

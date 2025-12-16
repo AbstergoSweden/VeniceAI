@@ -1,3 +1,11 @@
+/**
+ * Compresses a base64 encoded image using canvas.
+ * Converts any input format to JPEG to reduce size.
+ *
+ * @param {string} base64Src - The base64 string of the image (without data URI prefix).
+ * @param {number} [quality=0.85] - Compression quality (0 to 1).
+ * @returns {Promise<string>} A promise that resolves with the compressed base64 string (without prefix).
+ */
 export const compressImage = async (base64Src, quality = 0.85) => {
     return new Promise((resolve, reject) => {
         // Simple MIME detection

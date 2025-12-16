@@ -21,3 +21,15 @@ HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
     drawImage: vi.fn(),
 }));
 HTMLCanvasElement.prototype.toDataURL = vi.fn(() => "data:image/jpeg;base64,mockCompressedImage");
+
+// Mock Global Variables for Vite/Build
+global.__firebase_config = JSON.stringify({
+    apiKey: "test-api-key",
+    authDomain: "test-project.firebaseapp.com",
+    projectId: "test-project",
+    storageBucket: "test-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
+});
+global.__app_id = "test-app-id";
+global.__initial_auth_token = null;

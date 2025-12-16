@@ -11,7 +11,11 @@ import imageCache from './utils/cache';
 const ChatPanel = lazy(() => import('./components/ChatPanel'));
 const Transactions = lazy(() => import('./components/Transactions'));
 
-// Loading component for lazy-loaded components
+/**
+ * Loading component for lazy-loaded components.
+ * @param {object} props - Component props.
+ * @param {string} [props.message="Loading..."] - The message to display while loading.
+ */
 const LoadingComponent = ({ message = "Loading..." }) => (
     <div className="flex flex-col items-center justify-center p-8">
         <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
@@ -106,7 +110,10 @@ try {
 // --- HELPER FUNCTIONS ---
 // Moved to src/utils/api.js and src/utils/image.js
 
-
+/**
+ * Main Application Component.
+ * Handles the state and logic for the image generator, chat, and history.
+ */
 export default function App() {
     // --- STATE ---
     const [user, setUser] = useState(null);
@@ -148,7 +155,11 @@ export default function App() {
     const [imageDescription, setImageDescription] = useState('');
     const [describingImage, setDescribingImage] = useState(false);
 
-    // Helper to show toast notifications
+    /**
+     * Shows a toast notification.
+     * @param {string} message - The message to display.
+     * @param {string} [type='info'] - The type of toast ('info', 'success', 'warning', 'error').
+     */
     const showToast = (message, type = 'info') => {
         setToast({ show: true, message, type });
         setTimeout(() => setToast({ show: false, message: '', type: 'info' }), 4000);
@@ -247,6 +258,14 @@ export default function App() {
     // --- LOGIC ---
 
     // --- VENICE CHAT API CALL ---
+    /**
+     * Calls the Venice Chat API.
+     * @param {string} userMessage - The user's message.
+     * @param {string} [systemPrompt=VENICE_SYSTEM_PROMPT] - The system prompt.
+     * @param {string} [modelId=DEFAULT_CHAT_MODEL] - The model ID to use.
+     * @param {string|null} [imageBase64=null] - Base64 string of an image to send (if vision capable).
+     * @returns {Promise<string>} The response content.
+     */
     const callVeniceChat = async (userMessage, systemPrompt = VENICE_SYSTEM_PROMPT, modelId = DEFAULT_CHAT_MODEL, imageBase64 = null) => {
         setPromptLoading(true);
         try {
@@ -288,6 +307,9 @@ export default function App() {
         }
     };
 
+    /**
+     * Handles generating a prompt suggestion based on a user idea.
+     */
     const handleSuggest = async () => {
         const idea = window.prompt("Enter a simple idea (e.g., 'a cyberpunk city'):");
         if (!idea) return;
@@ -300,6 +322,9 @@ export default function App() {
         }
     };
 
+    /**
+     * Handles enhancing the current prompt.
+     */
     const handleEnhancePrompt = async () => {
         if (!prompt) return alert("Please enter a prompt first.");
         try {
@@ -312,6 +337,10 @@ export default function App() {
     };
 
     // Image Description Handlers
+    /**
+     * Handles image upload for description.
+     * @param {Event} e - The file input change event.
+     */
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -330,6 +359,9 @@ export default function App() {
         reader.readAsDataURL(file);
     };
 
+    /**
+     * Generates a description for the uploaded image.
+     */
     const handleDescribeImage = async () => {
         if (!uploadedImage) return;
 
@@ -353,6 +385,9 @@ export default function App() {
         }
     };
 
+    /**
+     * Uses the generated image description as the main prompt.
+     */
     const handleUseDescription = () => {
         if (imageDescription) {
             setPrompt(imageDescription);
@@ -363,6 +398,10 @@ export default function App() {
         }
     };
 
+    /**
+     * Handles the image generation process.
+     * @param {Event} e - Form submission event.
+     */
     const handleGenerate = async (e) => {
         e.preventDefault();
         if (!user) return alert("You must be signed in.");
@@ -420,7 +459,8 @@ export default function App() {
                         } catch (dbErr) {
                             console.warn("Failed to save to firestore", dbErr);
                             // We still want to show it in ephemeral state if we could
-                            setHistory(prev => [itemToSave, ...prev]);
+                            // Add a temporary ID for React key
+                            setHistory(prev => [{ ...itemToSave, id: `offline-${Date.now()}-${currentSeed}` }, ...prev]);
                         }
                     });
                 promises.push(p);
@@ -470,6 +510,10 @@ export default function App() {
         }
     };
 
+    /**
+     * Opens the enhancement modal for a selected image.
+     * @param {object} item - The history item to enhance.
+     */
     const openEnhanceModal = (item) => {
         setEnhanceTarget(item);
         setEnhancePrompt(''); // Optional: prefill with original prompt
@@ -477,6 +521,10 @@ export default function App() {
         setEnhanceModalOpen(true);
     };
 
+    /**
+     * Submits the image enhancement request.
+     * @param {Event} e - Form submission event.
+     */
     const handleEnhanceSubmit = async (e) => {
         e.preventDefault();
         if (!enhanceTarget) return;
@@ -534,15 +582,28 @@ export default function App() {
         }
     };
 
+    /**
+     * Clears all generated image history.
+     */
     const clearHistory = async () => {
         if (!window.confirm("Are you sure you want to delete all history?")) return;
         try {
             const collectionPath = `artifacts/${appId}/users/${user.uid}/${CONFIG.COLLECTION_NAME}`;
             const colRef = collection(db, ...collectionPath.split('/'));
             const snapshot = await getDocs(colRef);
-            const batch = writeBatch(db);
-            snapshot.docs.forEach((doc) => batch.delete(doc.ref));
-            await batch.commit();
+
+            // Chunk deletions into batches of 500
+            const CHUNK_SIZE = 500;
+            const chunks = [];
+            for (let i = 0; i < snapshot.docs.length; i += CHUNK_SIZE) {
+                chunks.push(snapshot.docs.slice(i, i + CHUNK_SIZE));
+            }
+
+            for (const chunk of chunks) {
+                const batch = writeBatch(db);
+                chunk.forEach((doc) => batch.delete(doc.ref));
+                await batch.commit();
+            }
         } catch {
             // alert("Failed to clear history.");
             setHistory([]); // Local clear at least
@@ -553,6 +614,11 @@ export default function App() {
     const [chatHistory, setChatHistory] = useState([]);
     const [systemPrompt, setSystemPrompt] = useState('');
 
+    /**
+     * Downloads the generated image.
+     * @param {string} base64 - Base64 string of the image.
+     * @param {string} seed - Seed used for generation (for filename).
+     */
     const downloadImage = (base64, seed) => {
         const link = document.createElement('a');
         link.href = `data:image/jpeg;base64,${base64}`;
@@ -596,7 +662,7 @@ export default function App() {
                                 {/* Prompt Area */}
                                 <div>
                                     <div className="flex justify-between items-center mb-2">
-                                        <label className="text-sm font-medium text-on-surface">Prompt</label>
+                                        <label htmlFor="prompt-input" className="text-sm font-medium text-on-surface">Prompt</label>
                                         <div className="flex gap-2">
                                             <button type="button" onClick={handleSuggest} disabled={promptLoading} className="m3-button-tonal text-xs py-1.5 px-3 flex items-center gap-1">
                                                 {promptLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Idea
@@ -610,6 +676,7 @@ export default function App() {
                                         </div>
                                     </div>
                                     <textarea
+                                        id="prompt-input"
                                         value={prompt}
                                         onChange={(e) => setPrompt(e.target.value)}
                                         className="m3-textfield w-full rounded-lg resize-none h-28"
