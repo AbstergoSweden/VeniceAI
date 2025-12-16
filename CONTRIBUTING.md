@@ -140,8 +140,6 @@ npm run lint
 
 ### React Best Practices
 
-From our [user rules](memory):
-
 - **Hooks Only**: No class components
 - **Pure Rendering**: Keep render logic pure; side effects in `useEffect`
 - **One-Way Data Flow**: Lift state or use Context
@@ -221,8 +219,6 @@ npx vitest --coverage
 - **All Tests Pass**: Before submitting PR
 
 ### Mocking
-
-From our [user rules](memory):
 
 ```javascript
 // ES modules

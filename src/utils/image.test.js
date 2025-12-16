@@ -13,24 +13,47 @@ const mockContext = {
   drawImage: vi.fn(),
 };
 
-global.HTMLCanvasElement = vi.fn(() => mockCanvas);
-global.Image = vi.fn(() => ({
-  width: 100,
-  height: 100,
-  src: '',
-  set onload(value) {
-    // Simulate image loading after a short delay
-    setTimeout(() => {
-      if (typeof value === 'function') value();
-    }, 10);
-  },
-  set onerror(value) {
-    // In case of error
-    if (typeof value === 'function') {
-      // No error in this test
+// Mock document.createElement('canvas')
+const originalCreateElement = document.createElement.bind(document);
+document.createElement = (tagName) => {
+  if (tagName === 'canvas') {
+    return mockCanvas;
+  }
+  return originalCreateElement(tagName);
+};
+
+// Global Image mock
+class MockImage {
+  constructor() {
+    this.width = 100;
+    this.height = 100;
+    this.src = '';
+    this._onload = null;
+    this._onerror = null;
+  }
+
+  set onload(callback) {
+    this._onload = callback;
+    if (callback) {
+        // Default behavior: load successfully
+        setTimeout(() => callback(), 10);
     }
   }
-}));
+
+  get onload() {
+      return this._onload;
+  }
+
+  set onerror(callback) {
+      this._onerror = callback;
+  }
+
+  get onerror() {
+      return this._onerror;
+  }
+}
+
+global.Image = MockImage;
 
 describe('image compression utility', () => {
   beforeEach(() => {
@@ -38,10 +61,14 @@ describe('image compression utility', () => {
     mockCanvas.height = 100;
     mockCanvas.getContext.mockReturnValue(mockContext);
     mockCanvas.toDataURL.mockReturnValue('data:image/jpeg;base64,testCompressedData');
+
+    // Reset Image mock to default behavior
+    global.Image = MockImage;
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it('should compress an image and return base64 string without data prefix', async () => {
@@ -71,48 +98,50 @@ describe('image compression utility', () => {
   });
 
   it('should handle timeout properly', async () => {
-    // Create a mock image that never loads to trigger timeout
-    const mockImageNeverLoads = {
-      width: 100,
-      height: 100,
-      src: '',
-      onload: null,
-      onerror: null,
-    };
-
-    global.Image = vi.fn(() => mockImageNeverLoads);
+    // Override Image mock to NOT trigger onload automatically
+    class MockImageNeverLoads {
+        constructor() {
+            this.width = 100;
+            this.height = 100;
+            this.src = '';
+            this.onload = null;
+            this.onerror = null;
+        }
+    }
+    global.Image = MockImageNeverLoads;
 
     const base64Image = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
 
-    // Mock setTimeout to control the timing
     vi.useFakeTimers();
 
     const promise = compressImage(base64Image);
 
-    // Fast-forward time beyond the 30 second timeout
     vi.advanceTimersByTime(31000);
 
     await expect(promise).rejects.toThrow('Image load timeout after 30 seconds');
-
-    vi.useRealTimers();
   });
 
   it('should handle image loading errors', async () => {
-    const mockImageError = {
-      width: 100,
-      height: 100,
-      src: '',
-      set onload(value) {
-        // Don't call onload, but simulate an error
-      },
-      set onerror(value) {
-        if (typeof value === 'function') {
-          setTimeout(() => value(new Error('Image load error')), 10);
-        }
-      }
-    };
+      // Override Image mock to trigger onerror
+      class MockImageError {
+          constructor() {
+            this.width = 100;
+            this.height = 100;
+            this.src = '';
+            this._onload = null;
+            this._onerror = null;
+          }
 
-    global.Image = vi.fn(() => mockImageError);
+          set onload(val) { this._onload = val; }
+
+          set onerror(callback) {
+              this._onerror = callback;
+              if (callback) {
+                  setTimeout(() => callback(new Error('Image load error')), 10);
+              }
+          }
+      }
+      global.Image = MockImageError;
 
     const base64Image = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
 
