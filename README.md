@@ -142,10 +142,10 @@ The following constants are defined in `src/App.jsx` and `src/utils/constants.js
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js**: v18 or higher ([Download](https://nodejs.org/))
-- **npm**: v9 or higher (comes with Node.js)
-- **Git**: For cloning the repository
-- **MetaMask**: Browser extension for Web3 features (optional)
+- [Node.js](https://nodejs.org/) v18 or higher
+- [npm](https://www.npmjs.com/) v9 or higher (comes with Node.js)
+- [Git](https://git-scm.com/) for cloning the repository
+- [MetaMask](https://metamask.io/) browser extension for Web3 features (optional)
 
 ---
 
@@ -154,8 +154,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone <https://github.com/AbstergoSweden/VeniceAI>
-cd app
+git clone https://github.com/AbstergoSweden/VeniceAI.git
+cd VeniceAI
 ```
 
 ### 2. Install Dependencies
@@ -180,7 +180,12 @@ This will install all required packages including:
 
 The app uses Venice.ai API keys configured via environment variables.
 
-1.  Copy `.env.example` to `.env`.
+1.  Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
 2.  Update `VITE_VENICE_API_KEYS` with your keys.
 
 ```env
@@ -204,7 +209,7 @@ For cloud-synced history:
 
 For Web3 features:
 
-1. Install MetaMask browser extension
+1. Install the MetaMask browser extension
 2. Update contract address in `src/utils/constants.js`
 3. Ensure you have testnet ETH (Sepolia network recommended)
 
