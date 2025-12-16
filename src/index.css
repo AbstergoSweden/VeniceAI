@@ -1,0 +1,545 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   ANDROID 16 MATERIAL 3 EXPRESSIVE - DARK PASTEL
+   ============================================ */
+
+/* --- DESIGN TOKENS (CSS Custom Properties) --- */
+:root {
+    /* === TYPOGRAPHY === */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* === DARK PASTEL COLOR SCHEME === */
+
+    /* Primary - Soft Lavender */
+    --md-sys-color-primary: #B8A9E8;
+    --md-sys-color-on-primary: #1E1A2E;
+    --md-sys-color-primary-container: #3D3560;
+    --md-sys-color-on-primary-container: #E4DCFF;
+
+    /* Secondary - Muted Teal */
+    --md-sys-color-secondary: #7DCFCF;
+    --md-sys-color-on-secondary: #003737;
+    --md-sys-color-secondary-container: #1A4545;
+    --md-sys-color-on-secondary-container: #A8F0F0;
+
+    /* Tertiary - Soft Coral */
+    --md-sys-color-tertiary: #E8A9C4;
+    --md-sys-color-on-tertiary: #3E1A2A;
+    --md-sys-color-tertiary-container: #5C3347;
+    --md-sys-color-on-tertiary-container: #FFD8E8;
+
+    /* Error - Pastel Rose */
+    --md-sys-color-error: #FFB4AB;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-error-container: #4A2024;
+    --md-sys-color-on-error-container: #FFDAD6;
+
+    /* Surfaces - Deep Charcoal with Tints */
+    --md-sys-color-surface-dim: #0D0D12;
+    --md-sys-color-surface: #121218;
+    --md-sys-color-surface-bright: #1A1A22;
+    --md-sys-color-surface-container-lowest: #0A0A0F;
+    --md-sys-color-surface-container-low: #14141C;
+    --md-sys-color-surface-container: #1C1C26;
+    --md-sys-color-surface-container-high: #242430;
+    --md-sys-color-surface-container-highest: #2E2E3C;
+
+    /* On Surface Colors */
+    --md-sys-color-on-surface: #E6E1E9;
+    --md-sys-color-on-surface-variant: #A9A4B0;
+
+    /* Outline Colors */
+    --md-sys-color-outline: #6B6678;
+    --md-sys-color-outline-variant: #44404D;
+
+    /* Inverse Colors */
+    --md-sys-color-inverse-surface: #E6E1E9;
+    --md-sys-color-inverse-on-surface: #1C1B1F;
+    --md-sys-color-inverse-primary: #6750A4;
+
+    /* Scrim */
+    --md-sys-color-scrim: rgba(0, 0, 0, 0.6);
+
+    /* Success - Pastel Mint */
+    --md-sys-color-success: #A8E8C4;
+    --md-sys-color-on-success: #003822;
+    --md-sys-color-success-container: #1A4532;
+    --md-sys-color-on-success-container: #C8FFE4;
+
+    /* Warning - Pastel Amber */
+    --md-sys-color-warning: #E8D4A8;
+    --md-sys-color-on-warning: #3A2E10;
+    --md-sys-color-warning-container: #4D4020;
+    --md-sys-color-on-warning-container: #FFF0C8;
+
+    /* Info - Pastel Sky */
+    --md-sys-color-info: #A8D4E8;
+    --md-sys-color-on-info: #0A3040;
+    --md-sys-color-info-container: #1A4050;
+    --md-sys-color-on-info-container: #C8F0FF;
+
+    /* === ELEVATION (Surface Tint Overlay) === */
+    --md-sys-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --md-sys-elevation-2: 0 3px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+    --md-sys-elevation-3: 0 6px 12px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3);
+    --md-sys-elevation-4: 0 8px 16px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3);
+    --md-sys-elevation-5: 0 12px 24px rgba(0, 0, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.3);
+
+    /* === SHAPE (Corner Radii) - M3 Expressive === */
+    --md-sys-shape-corner-none: 0;
+    --md-sys-shape-corner-extra-small: 4px;
+    --md-sys-shape-corner-small: 8px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-extra-large: 24px;
+    --md-sys-shape-corner-full: 9999px;
+
+    /* === MOTION (Spring-based) === */
+    --md-sys-motion-duration-short: 150ms;
+    --md-sys-motion-duration-medium: 250ms;
+    --md-sys-motion-duration-long: 400ms;
+    --md-sys-motion-duration-extra-long: 550ms;
+    --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+    --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+    --md-sys-motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* === BASE STYLES === */
+html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    background-color: var(--md-sys-color-surface-dim);
+    color: var(--md-sys-color-on-surface);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+/* === SELECTION === */
+::selection {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+/* === SCROLLBAR (WebKit) === */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--md-sys-color-surface-container-low);
+    border-radius: var(--md-sys-shape-corner-full);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--md-sys-color-outline);
+}
+
+/* ============================================
+   UTILITY LAYERS
+   ============================================ */
+
+@layer components {
+
+    /* === M3 ELEVATED SURFACE CARD === */
+    .m3-surface {
+        background-color: var(--md-sys-color-surface-container);
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: var(--md-sys-shape-corner-extra-large);
+    }
+
+    .m3-surface-elevated {
+        background-color: var(--md-sys-color-surface-container-high);
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: var(--md-sys-shape-corner-extra-large);
+        box-shadow: var(--md-sys-elevation-2);
+    }
+
+    /* === GLASSMORPHISM CARD === */
+    .m3-glass {
+        background: linear-gradient(135deg,
+                rgba(184, 169, 232, 0.08) 0%,
+                rgba(125, 207, 207, 0.05) 50%,
+                rgba(232, 169, 196, 0.08) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--md-sys-shape-corner-extra-large);
+    }
+
+    /* === M3 FILLED BUTTON === */
+    .m3-button-filled {
+        background-color: var(--md-sys-color-primary);
+        color: var(--md-sys-color-on-primary);
+        border: none;
+        border-radius: var(--md-sys-shape-corner-full);
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+        box-shadow: var(--md-sys-elevation-1);
+    }
+
+    .m3-button-filled:hover {
+        box-shadow: var(--md-sys-elevation-3);
+        transform: translateY(-1px);
+    }
+
+    .m3-button-filled:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    /* === M3 TONAL BUTTON === */
+    .m3-button-tonal {
+        background-color: var(--md-sys-color-secondary-container);
+        color: var(--md-sys-color-on-secondary-container);
+        border: none;
+        border-radius: var(--md-sys-shape-corner-full);
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    }
+
+    .m3-button-tonal:hover {
+        background-color: var(--md-sys-color-secondary);
+        color: var(--md-sys-color-on-secondary);
+    }
+
+    /* === M3 OUTLINED BUTTON === */
+    .m3-button-outlined {
+        background-color: transparent;
+        color: var(--md-sys-color-primary);
+        border: 1px solid var(--md-sys-color-outline);
+        border-radius: var(--md-sys-shape-corner-full);
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    }
+
+    .m3-button-outlined:hover {
+        background-color: rgba(184, 169, 232, 0.12);
+        border-color: var(--md-sys-color-primary);
+    }
+
+    /* === M3 FILLED TEXT FIELD === */
+    .m3-textfield {
+        background-color: var(--md-sys-color-surface-container-highest);
+        color: var(--md-sys-color-on-surface);
+        border: none;
+        border-bottom: 2px solid var(--md-sys-color-outline-variant);
+        border-radius: var(--md-sys-shape-corner-small) var(--md-sys-shape-corner-small) 0 0;
+        padding: 1rem;
+        font-size: 0.875rem;
+        transition: all var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    }
+
+    .m3-textfield:focus {
+        outline: none;
+        border-bottom-color: var(--md-sys-color-primary);
+        background-color: var(--md-sys-color-surface-container-high);
+    }
+
+    .m3-textfield::placeholder {
+        color: var(--md-sys-color-on-surface-variant);
+    }
+
+    /* === M3 OUTLINED TEXT FIELD === */
+    .m3-textfield-outlined {
+        background-color: transparent;
+        color: var(--md-sys-color-on-surface);
+        border: 1px solid var(--md-sys-color-outline);
+        border-radius: var(--md-sys-shape-corner-small);
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        transition: all var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    }
+
+    .m3-textfield-outlined:focus {
+        outline: none;
+        border-color: var(--md-sys-color-primary);
+        border-width: 2px;
+        padding: calc(0.75rem - 1px) calc(1rem - 1px);
+    }
+
+    /* === M3 SELECT === */
+    .m3-select {
+        background-color: var(--md-sys-color-surface-container-high);
+        color: var(--md-sys-color-on-surface);
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: var(--md-sys-shape-corner-small);
+        padding: 0.625rem 0.75rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    }
+
+    .m3-select:focus {
+        outline: none;
+        border-color: var(--md-sys-color-primary);
+    }
+
+    /* === M3 SLIDER === */
+    .m3-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 4px;
+        background: var(--md-sys-color-surface-container-highest);
+        border-radius: var(--md-sys-shape-corner-full);
+        cursor: pointer;
+    }
+
+    .m3-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: var(--md-sys-color-primary);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: var(--md-sys-elevation-1);
+        transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-spring);
+    }
+
+    .m3-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.15);
+        box-shadow: var(--md-sys-elevation-2);
+    }
+
+    /* === M3 CHECKBOX === */
+    .m3-checkbox {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--md-sys-color-primary);
+        cursor: pointer;
+    }
+
+    /* === M3 DIALOG (Modal) === */
+    .m3-dialog-scrim {
+        background-color: var(--md-sys-color-scrim);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+    }
+
+    .m3-dialog {
+        background-color: var(--md-sys-color-surface-container-high);
+        border-radius: var(--md-sys-shape-corner-extra-large);
+        box-shadow: var(--md-sys-elevation-5);
+        border: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    /* === M3 MEDIA CARD === */
+    .m3-media-card {
+        background-color: var(--md-sys-color-surface-container);
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: var(--md-sys-shape-corner-large);
+        overflow: hidden;
+        transition: all var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
+    }
+
+    .m3-media-card:hover {
+        border-color: var(--md-sys-color-primary);
+        box-shadow: var(--md-sys-elevation-3);
+        transform: translateY(-4px);
+    }
+
+    /* === M3 CHIP === */
+    .m3-chip {
+        background-color: var(--md-sys-color-surface-container-high);
+        color: var(--md-sys-color-on-surface);
+        border: 1px solid var(--md-sys-color-outline);
+        border-radius: var(--md-sys-shape-corner-full);
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+    }
+
+    .m3-chip:hover {
+        background-color: var(--md-sys-color-surface-container-highest);
+    }
+
+    .m3-chip-selected {
+        background-color: var(--md-sys-color-secondary-container);
+        color: var(--md-sys-color-on-secondary-container);
+        border-color: transparent;
+    }
+}
+
+@layer utilities {
+
+    /* === ANIMATIONS === */
+    @keyframes slide-up {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes scale-in {
+        from {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes spring-bounce {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes pulse-glow {
+
+        0%,
+        100% {
+            box-shadow: 0 0 20px rgba(184, 169, 232, 0.3);
+        }
+
+        50% {
+            box-shadow: 0 0 40px rgba(184, 169, 232, 0.5);
+        }
+    }
+
+    .animate-slide-up {
+        animation: slide-up var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized-decelerate);
+    }
+
+    .animate-fade-in {
+        animation: fade-in var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    }
+
+    .animate-scale-in {
+        animation: scale-in var(--md-sys-motion-duration-long) var(--md-sys-motion-easing-emphasized-decelerate);
+    }
+
+    .animate-spring-bounce {
+        animation: spring-bounce var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-spring);
+    }
+
+    .animate-shimmer {
+        background: linear-gradient(90deg,
+                var(--md-sys-color-surface-container) 25%,
+                var(--md-sys-color-surface-container-high) 50%,
+                var(--md-sys-color-surface-container) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+
+    .animate-pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    /* === GRADIENT UTILITIES === */
+    .gradient-primary {
+        background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
+    }
+
+    .gradient-secondary {
+        background: linear-gradient(135deg, var(--md-sys-color-secondary) 0%, var(--md-sys-color-primary) 100%);
+    }
+
+    .text-gradient-primary {
+        background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .text-gradient-secondary {
+        background: linear-gradient(135deg, var(--md-sys-color-secondary) 0%, var(--md-sys-color-primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* === STATE LAYER OVERLAYS === */
+    .state-hover:hover::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-color: var(--md-sys-color-on-surface);
+        opacity: 0.08;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+    .state-pressed:active::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-color: var(--md-sys-color-on-surface);
+        opacity: 0.12;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+    /* === FOCUS RING === */
+    .focus-ring:focus-visible {
+        outline: 2px solid var(--md-sys-color-primary);
+        outline-offset: 2px;
+    }
+
+    /* Fix for missing standard line-clamp property */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        overflow: hidden;
+    }
+}
