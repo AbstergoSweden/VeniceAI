@@ -27,7 +27,7 @@ const LoadingComponent = ({ message = "Loading..." }) => (
 // --- CONFIGURATION ---
 const CONFIG = {
     // Loaded from .env
-    API_KEYS: (import.meta.env.VITE_VENICE_API_KEYS || '').split(',').filter(Boolean),
+    API_KEYS: (import.meta.env.VITE_VENICE_API_KEYS || '').split(',').filter(Boolean).map(key => key.trim()),
     BASE_API_URL: "https://api.venice.ai/api/v1",
     DEFAULT_NEGATIVE_PROMPT: "Ugly, old, overage, low-resolution, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, JPEG artifacts, signature, watermark, username, blurry.",
     COLLECTION_NAME: 'generatedImages'
@@ -552,8 +552,8 @@ export default function App() {
                     const newBase64 = reader.result.split(',')[1];
                     const compressed = await compressImage(newBase64);
 
-                    // Bug #5 Fix: Validate Firestore document ID before attempting update
-                    if (!enhanceTarget.id || enhanceTarget.id.startsWith('mock-')) {
+                    // Bug #4 Fix: Validate Firestore document ID before attempting update
+                    if (!enhanceTarget.id || enhanceTarget.id.startsWith('mock-') || enhanceTarget.id.startsWith('offline-')) {
                         showToast('Cannot enhance offline images. Please generate online first.', 'error');
                         setGenerating(false);
                         return;

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { apiCall } from './api';
 
 // Mock config
@@ -32,12 +32,10 @@ describe('apiCall Logic', () => {
             json: async () => ({ error: { message: 'Unauthorized' } })
         });
 
-        // Start at index 1 (key2)
-        try {
-            await apiCall('https://test.com', { prompt: 'test' }, mockConfig, 1);
-        } catch (e) {
+        // Start at index 1 (key2) - expected to fail after trying all keys
+        await apiCall('https://test.com', { prompt: 'test' }, mockConfig, 1).catch(() => {
             // Expected to fail
-        }
+        });
 
         // Should call twice: key2 then key1
         expect(global.fetch).toHaveBeenCalledTimes(2);

@@ -11,11 +11,11 @@ vi.mock('ethers', async () => {
         BrowserProvider: vi.fn(),
         Contract: vi.fn(),
         isAddress: vi.fn((addr) => addr === '0xValidAddress'),
-        parseEther: vi.fn((val) => {
-            if (val === 'invalid') throw new Error('Invalid amount');
+        parseEther: vi.fn((_val) => {
+            if (_val === 'invalid') throw new Error('Invalid amount');
             return { toString: () => '1000000000000000000' }; // 1 ETH
         }),
-        formatEther: vi.fn((val) => '1.0'),
+        formatEther: vi.fn(() => '1.0'),
     };
 });
 

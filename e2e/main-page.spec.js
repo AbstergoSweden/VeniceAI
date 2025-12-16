@@ -45,10 +45,10 @@ test.describe('Venice.ai Generator App', () => {
     // Click on the model select dropdown
     const modelSelect = page.locator('select').first();
     await expect(modelSelect).toBeVisible();
-    
+
     // Get all options in the dropdown
     const optionsCount = await page.locator('select option').count();
-    
+
     // Should have multiple model options
     expect(optionsCount).toBeGreaterThan(1);
   });
@@ -76,7 +76,7 @@ test.describe('Venice.ai Generator App', () => {
 
   test('should handle negative prompt input', async ({ page }) => {
     const testNegativePrompt = 'ugly, blurry, low quality';
-    
+
     // Find the negative prompt textarea (using label association)
     const negativePromptTextarea = page.locator('textarea').nth(1); // Second textarea
     await negativePromptTextarea.fill(testNegativePrompt);
@@ -88,34 +88,34 @@ test.describe('Venice.ai Generator App', () => {
   test('should handle the idea suggestion feature', async ({ page }) => {
     // Click the "Idea" button to suggest a prompt
     const ideaButton = page.locator('button', { hasText: 'Idea' });
-    
+
     // Mock the browser prompt since Playwright doesn't handle native dialogs by default
     await page.on('dialog', dialog => {
       dialog.accept('a cyberpunk city');
     });
 
     await ideaButton.click();
-    
+
     // The prompt textarea should now contain the suggested prompt
     const promptTextarea = page.locator('textarea[placeholder*="A futuristic cityscape"]');
     await expect(promptTextarea).not.toHaveValue('');
   });
 
   test('should toggle advanced options', async ({ page }) => {
-    // Check that the hide watermark checkbox is present
-    const hideWatermarkCheckbox = page.locator('text=Hide Watermark').locator('..').locator('input[type="checkbox"]');
+    // Check that the hide watermark checkbox is present (using getByLabel for robustness)
+    const hideWatermarkCheckbox = page.getByLabel('Hide Watermark');
     await expect(hideWatermarkCheckbox).toBeVisible();
-    
+
     // Check that the blur NSFW checkbox is present
-    const blurNSFWCheckbox = page.locator('text=Blur NSFW').locator('..').locator('input[type="checkbox"]');
+    const blurNSFWCheckbox = page.getByLabel('Blur NSFW');
     await expect(blurNSFWCheckbox).toBeVisible();
 
-    // Test toggling the hide watermark option
-    await expect(hideWatermarkCheckbox).not.toBeChecked();
-    await hideWatermarkCheckbox.check();
+    // Test toggling the hide watermark option (default is checked)
     await expect(hideWatermarkCheckbox).toBeChecked();
+    await hideWatermarkCheckbox.uncheck();
+    await expect(hideWatermarkCheckbox).not.toBeChecked();
 
-    // Test toggling the blur NSFW option
+    // Test toggling the blur NSFW option (default is unchecked)
     await expect(blurNSFWCheckbox).not.toBeChecked();
     await blurNSFWCheckbox.check();
     await expect(blurNSFWCheckbox).toBeChecked();
