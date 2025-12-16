@@ -59,6 +59,85 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 
 ---
 
+## Project Tree
+
+```
+.
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── SECURITY.md
+├── docs
+│   ├── API_DOCUMENTATION.md
+│   ├── HOW_TO_USE.md
+│   ├── LEGAL.md
+│   └── OPENAI_COMPATIBLE_USAGE.md
+├── e2e
+│   ├── chat.spec.js
+│   ├── main-page.spec.js
+│   └── transactions.spec.js
+├── electron
+│   ├── entitlements.mac.plist
+│   ├── main.js
+│   └── preload.js
+├── eslint.config.js
+├── index.html
+├── package.json
+├── playwright.config.js
+├── postcss.config.js
+├── public
+│   └── vite.svg
+├── src
+│   ├── App.jsx
+│   ├── assets
+│   ├── components
+│   │   ├── ChatPanel.jsx
+│   │   └── Transactions.jsx
+│   ├── index.css
+│   ├── main.jsx
+│   ├── test
+│   │   └── setup.js
+│   └── utils
+│       ├── api.js
+│       ├── api.test.js
+│       ├── cache.js
+│       ├── constants.js
+│       └── image.js
+├── tailwind.config.js
+├── vite.config.js
+└── vitest.config.js
+```
+
+---
+
+## Configuration
+
+### Detailed List of All Settings
+
+The application uses environment variables for configuration. Create a `.env` file in the root directory (copy from `.env.example`).
+
+| Environment Variable | Required | Description |
+|----------------------|----------|-------------|
+| `VITE_VENICE_API_KEYS` | **Yes** | Comma-separated list of Venice.ai API keys. Used for image generation and chat. Having multiple keys enables automatic rotation and failover. |
+| `VITE_FIREBASE_API_KEY` | No | Firebase API Key for authentication and database access. |
+| `VITE_FIREBASE_AUTH_DOMAIN` | No | Firebase Auth Domain (e.g., `project-id.firebaseapp.com`). |
+| `VITE_FIREBASE_PROJECT_ID` | No | Firebase Project ID. |
+| `VITE_FIREBASE_STORAGE_BUCKET` | No | Firebase Storage Bucket URL. |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | No | Firebase Messaging Sender ID. |
+| `VITE_FIREBASE_APP_ID` | No | Firebase App ID. |
+| `VITE_APP_ID` | No | Unique identifier for this app instance (defaults to `default-app-id`). Useful if multiple apps share the same Firebase project. |
+
+#### Internal Configuration
+
+The following constants are defined in `src/App.jsx` and `src/utils/constants.js`:
+
+*   **`CONFIG.BASE_API_URL`**: `https://api.venice.ai/api/v1` - Base URL for Venice.ai API.
+*   **`CONFIG.DEFAULT_NEGATIVE_PROMPT`**: A default string of negative prompts to improve image quality.
+*   **`CONFIG.COLLECTION_NAME`**: `generatedImages` - Firestore collection name for storing history.
+*   **`VENICE_CHAT_MODELS`**: List of available chat models and their capabilities (vision, reasoning).
+
+---
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
@@ -97,39 +176,29 @@ This will install all required packages including:
 
 ### 3. Configuration
 
-#### Firebase Setup (Optional but Recommended)
-
-Create `src/firebase-config.js`:
-
-```javascript
-export const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "your-app.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-app.firebasestorage.app",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-};
-```
-
-> **Note**: Without Firebase, the app runs in offline mode with local-only history.
-
 #### Venice.ai API Keys
 
-The app uses Venice.ai API keys configured in `src/App.jsx`. Update the `CONFIG.API_KEYS` array with your own keys:
+The app uses Venice.ai API keys configured via environment variables.
 
-```javascript
-const CONFIG = {
-    API_KEYS: [
-        'your-primary-key',
-        'your-backup-key-1',
-        'your-backup-key-2'
-    ],
-    // ...
-};
+1.  Copy `.env.example` to `.env`.
+2.  Update `VITE_VENICE_API_KEYS` with your keys.
+
+```env
+VITE_VENICE_API_KEYS=your-primary-key,your-backup-key-1
 ```
 
-> **Important**: Never commit real API keys to version control. Consider using environment variables in production.
+> **Important**: Never commit real API keys to version control.
+
+#### Firebase Setup (Optional but Recommended)
+
+For cloud-synced history:
+
+1.  Create a project at [console.firebase.google.com](https://console.firebase.google.com).
+2.  Enable **Anonymous Authentication**.
+3.  Create a **Firestore Database**.
+4.  Add your Firebase configuration to the `.env` file.
+
+> **Note**: Without Firebase, the app runs in offline mode with local-only history.
 
 #### Ethereum/Web3 Setup (Optional)
 
@@ -250,38 +319,6 @@ This command:
 - **Import Order**: Group imports by type (React, libraries, local)
 - **Naming**: camelCase for variables/functions, PascalCase for components
 - **File Structure**: Co-locate tests with source files (`*.test.js`, `*.test.jsx`)
-
-### Project Structure
-
-```
-app/
-├── electron/              # Electron main process files
-│   ├── main.js
-│   └── entitlements.mac.plist
-├── src/
-│   ├── assets/           # Static assets
-│   ├── components/       # React components
-│   │   ├── ChatPanel.jsx
-│   │   └── Transactions.jsx
-│   ├── test/             # Test utilities
-│   │   └── setup.js
-│   ├── utils/            # Utility functions
-│   │   ├── api.js
-│   │   ├── api.test.js
-│   │   ├── constants.js
-│   │   └── image.js
-│   ├── App.jsx           # Main app component
-│   ├── main.jsx          # React entry point
-│   └── index.css         # Global styles
-├── public/               # Public static files
-├── dist/                 # Production build output
-├── release/              # Electron build output
-├── package.json
-├── vite.config.js
-├── vitest.config.js
-├── tailwind.config.js
-└── README.md
-```
 
 ---
 
@@ -429,13 +466,13 @@ Found a bug? Please open an issue with:
 
 ## Known Issues
 
-See [bug_report.md](.gemini/antigravity/brain/.../bug_report.md) for documented bugs and fixes in progress.
+- Please check the GitHub Issues page for the latest known bugs and feature requests.
 
 ---
 
 ## License
 
-This project is private and proprietary. All rights reserved.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 

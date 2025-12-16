@@ -467,6 +467,7 @@ If you have access to premium models:
 - See [OpenAI Compatibility](OPENAI_COMPATIBLE_USAGE.md) for API usage
 - Review [Contributing Guidelines](../CONTRIBUTING.md) to help improve the project
 - Check [README](../README.md) for project overview
+- [Legal Information](LEGAL.md)
 
 ---
 

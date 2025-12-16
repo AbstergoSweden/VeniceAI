@@ -511,3 +511,4 @@ curl -X POST https://api.venice.ai/api/v1/chat/completions \
 - [How to Use Guide](HOW_TO_USE.md)
 - [OpenAI Compatibility Guide](OPENAI_COMPATIBLE_USAGE.md)
 - [Main README](../README.md)
+- [Legal Information](LEGAL.md)
