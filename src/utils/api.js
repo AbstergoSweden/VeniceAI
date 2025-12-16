@@ -36,15 +36,33 @@ export const apiCall = async (url, data, config, initialKeyIndex = 0, isBinary =
             const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
             try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
+                // Determine HTTP method based on whether data is provided
+                const method = data ? 'POST' : 'GET';
+
+                const fetchOptions = {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
                     signal: controller.signal
-                });
+                };
+
+                // Only add body for POST requests
+                if (data) {
+                    fetchOptions.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(url, fetchOptions);
                 clearTimeout(timeoutId);
 
                 if (response.ok) {
+                    // Inspect Rate Limit Headers
+                    const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
+                    if (rateLimitRemaining && parseInt(rateLimitRemaining, 10) < 10) {
+                        console.warn(`[Venice API] Low quota warning: ${rateLimitRemaining} requests remaining`);
+                    }
+
                     const result = isBinary ? await response.arrayBuffer() : await response.json();
 
                     // If this was an image generation request, cache the result
@@ -64,9 +82,17 @@ export const apiCall = async (url, data, config, initialKeyIndex = 0, isBinary =
                 }
 
                 if (response.status === 429) {
-                    // Rate Limit: Retry with exponential backoff
+                    // Rate Limit: Retry with exponential backoff or Retry-After header
                     if (retries < maxRetries) {
-                        const delay = Math.pow(2, retries) * 1000 + Math.random() * 500;
+                        const retryAfter = response.headers.get('Retry-After');
+                        let delay;
+                        if (retryAfter) {
+                            // Retry-After can be seconds or a date, usually seconds for rate limits in this API
+                            delay = parseInt(retryAfter, 10) * 1000;
+                        } else {
+                            delay = Math.pow(2, retries) * 1000 + Math.random() * 500;
+                        }
+
                         await new Promise(r => setTimeout(r, delay));
                         retries++;
                         continue;

@@ -664,13 +664,13 @@ export default function App() {
                                     <div className="flex justify-between items-center mb-2">
                                         <label htmlFor="prompt-input" className="text-sm font-medium text-on-surface">Prompt</label>
                                         <div className="flex gap-2">
-                                            <button type="button" onClick={handleSuggest} disabled={promptLoading} className="m3-button-tonal text-xs py-1.5 px-3 flex items-center gap-1">
+                                            <button type="button" onClick={handleSuggest} disabled={promptLoading} className="m3-button-tonal text-xs py-1.5 px-3 flex items-center gap-1" aria-label="Generate prompt from idea">
                                                 {promptLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Idea
                                             </button>
-                                            <button type="button" onClick={handleEnhancePrompt} disabled={promptLoading} className="m3-button-tonal text-xs py-1.5 px-3 flex items-center gap-1 !bg-primary-container !text-on-primary-container hover:!bg-primary hover:!text-on-primary">
+                                            <button type="button" onClick={handleEnhancePrompt} disabled={promptLoading} className="m3-button-tonal text-xs py-1.5 px-3 flex items-center gap-1 !bg-primary-container !text-on-primary-container hover:!bg-primary hover:!text-on-primary" aria-label="Enhance current prompt with AI">
                                                 {promptLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />} Enhance
                                             </button>
-                                            <button type="button" onClick={() => setDescribeModalOpen(true)} className="m3-button-tonal text-xs py-1.5 px-3 flex items-center gap-1 !bg-tertiary-container !text-on-tertiary-container hover:!bg-tertiary hover:!text-on-tertiary">
+                                            <button type="button" onClick={() => setDescribeModalOpen(true)} className="m3-button-tonal text-xs py-1.5 px-3 flex items-center gap-1 !bg-tertiary-container !text-on-tertiary-container hover:!bg-tertiary hover:!text-on-tertiary" aria-label="Describe an uploaded image to generate prompt">
                                                 <ImageIcon className="w-3 h-3" /> Describe
                                             </button>
                                         </div>
@@ -772,20 +772,20 @@ export default function App() {
                                     >
                                         {generating ? <><Loader2 className="animate-spin" /> Generating...</> : <><Sparkles /> Generate</>}
                                     </button>
-                                    <button type="button" onClick={clearHistory} className="m3-button-outlined text-xs text-error border-error/50 hover:bg-error/10 flex items-center justify-center gap-1 py-2">
+                                    <button type="button" onClick={clearHistory} className="m3-button-outlined text-xs text-error border-error/50 hover:bg-error/10 flex items-center justify-center gap-1 py-2" aria-label="Clear all generated image history">
                                         <Trash2 className="w-3 h-3" /> Clear History
                                     </button>
                                     <button type="button" onClick={() => {
                                         imageCache.cleanup(true);
                                         showToast('Image cache cleared', 'info');
-                                    }} className="m3-button-outlined text-xs text-on-surface-variant border-outline-variant/50 hover:bg-surface-container/50 flex items-center justify-center gap-1 py-2">
+                                    }} className="m3-button-outlined text-xs text-on-surface-variant border-outline-variant/50 hover:bg-surface-container/50 flex items-center justify-center gap-1 py-2" aria-label="Clear image cache to free up memory">
                                         <Trash2 className="w-3 h-3" /> Clear Image Cache
                                     </button>
                                     <button type="button" onClick={() => {
                                         // Show cache statistics
                                         const stats = imageCache.getStats();
                                         showToast(`Cache: ${stats.count} items, ${stats.size}`, 'info');
-                                    }} className="m3-button-outlined text-xs text-on-surface-variant border-outline-variant/50 hover:bg-surface-container/50 flex items-center justify-center gap-1 py-2">
+                                    }} className="m3-button-outlined text-xs text-on-surface-variant border-outline-variant/50 hover:bg-surface-container/50 flex items-center justify-center gap-1 py-2" aria-label="View image cache statistics">
                                         <ImageIcon className="w-3 h-3" /> Cache Stats
                                     </button>
                                 </div>
@@ -836,12 +836,14 @@ export default function App() {
                                                 <button
                                                     onClick={() => downloadImage(item.base64, item.params?.seed)}
                                                     className="m3-button-tonal flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1"
+                                                    aria-label={`Download image with seed ${item.params?.seed}`}
                                                 >
                                                     <Download className="w-3 h-3" /> Save
                                                 </button>
                                                 <button
                                                     onClick={() => openEnhanceModal(item)}
                                                     className="m3-button-tonal flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1 !bg-tertiary-container !text-on-tertiary-container hover:!bg-tertiary"
+                                                    aria-label={`Enhance image with seed ${item.params?.seed}`}
                                                 >
                                                     <Wand2 className="w-3 h-3" /> Enhance
                                                 </button>
@@ -883,7 +885,7 @@ export default function App() {
                     <div className="m3-dialog w-full max-w-md overflow-hidden animate-scale-in">
                         <div className="p-6 border-b border-outline-variant flex justify-between items-center">
                             <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><Wand2 className="text-tertiary" /> Enhance Image</h3>
-                            <button onClick={() => setEnhanceModalOpen(false)} className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setEnhanceModalOpen(false)} className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest" aria-label="Close enhancement modal"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-6 space-y-5">
                             {enhanceTarget && (
@@ -938,7 +940,7 @@ export default function App() {
                                 setDescribeModalOpen(false);
                                 setUploadedImage(null);
                                 setImageDescription('');
-                            }} className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest">
+                            }} className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest" aria-label="Close image description modal">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -973,6 +975,7 @@ export default function App() {
                                                 setImageDescription('');
                                             }}
                                             className="absolute top-2 right-2 p-1.5 bg-error hover:bg-error/80 text-on-error rounded-full transition shadow-elevation-2"
+                                            aria-label="Remove uploaded image"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
@@ -1042,6 +1045,7 @@ export default function App() {
                         <button
                             onClick={() => setToast({ show: false, message: '', type: 'info' })}
                             className="text-on-surface-variant hover:text-on-surface transition p-0.5 rounded-full hover:bg-surface/20"
+                            aria-label="Close notification"
                         >
                             <X className="w-4 h-4" />
                         </button>
