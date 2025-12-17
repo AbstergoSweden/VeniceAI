@@ -28,6 +28,10 @@ firebase-config.js
 GEMINI.md
 QWEN.md
 *.ai.md
+.adjustments
+.agent
+agent.md
+.jules
 
 # Testing & Coverage
 coverage/

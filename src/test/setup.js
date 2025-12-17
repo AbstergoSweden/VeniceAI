@@ -22,6 +22,32 @@ HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
 }));
 HTMLCanvasElement.prototype.toDataURL = vi.fn(() => "data:image/jpeg;base64,mockCompressedImage");
 
+// Mock localStorage
+const localStorageMock = (() => {
+    let store = {};
+    return {
+        getItem: (key) => store[key] || null,
+        setItem: (key, value) => {
+            store[key] = value.toString();
+        },
+        removeItem: (key) => {
+            delete store[key];
+        },
+        clear: () => {
+            store = {};
+        },
+        key: (index) => {
+            const keys = Object.keys(store);
+            return keys[index] || null;
+        },
+        get length() {
+            return Object.keys(store).length;
+        }
+    };
+})();
+
+global.localStorage = localStorageMock;
+
 // Mock Global Variables for Vite/Build
 global.__firebase_config = JSON.stringify({
     apiKey: "test-api-key",

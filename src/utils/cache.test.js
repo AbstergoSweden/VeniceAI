@@ -1,0 +1,270 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { set, get, generateKey, getCached, cleanup, getStats, setQuotaExceededCallback } from './cache';
+
+describe('Image Cache Utility', () => {
+    beforeEach(() => {
+        localStorage.clear();
+        vi.clearAllMocks();
+    });
+
+    describe('generateKey', () => {
+        it('should generate consistent keys for identical params', () => {
+            const params = { prompt: 'test', model: 'fluently-xl', seed: 123 };
+            const key1 = generateKey(params);
+            const key2 = generateKey(params);
+            expect(key1).toBe(key2);
+        });
+
+        it('should generate different keys for different params', () => {
+            const params1 = { prompt: 'test1', seed: 123 };
+            const params2 = { prompt: 'test2', seed: 123 };
+            const key1 = generateKey(params1);
+            const key2 = generateKey(params2);
+            expect(key1).not.toBe(key2);
+        });
+
+        it('should only include cacheable parameters', () => {
+            const params1 = {
+                prompt: 'test',
+                seed: 123,
+                timestamp: Date.now() // Non-cacheable
+            };
+            const params2 = {
+                prompt: 'test',
+                seed: 123,
+                timestamp: Date.now() + 1000 // Different timestamp
+            };
+
+            // Keys should be same despite different timestamps
+            const key1 = generateKey(params1);
+            const key2 = generateKey(params2);
+            expect(key1).toBe(key2);
+        });
+    });
+
+    describe('set and get', () => {
+        it('should store and retrieve cache entries', () => {
+            const key = 'test-key';
+            const imageData = 'base64encodedimage';
+
+            const result = set(key, imageData);
+            expect(result).toBe(true);
+
+            const retrieved = get(key);
+            expect(retrieved).toBe(imageData);
+        });
+
+        it('should return null for non-existent keys', () => {
+            const result = get('non-existent-key');
+            expect(result).toBeNull();
+        });
+
+        it('should handle QuotaExceededError gracefully', () => {
+            const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+            const error = new Error('QuotaExceededError');
+            error.name = 'QuotaExceededError';
+            setItemSpy.mockImplementation(() => { throw error; });
+
+            const result = set('test-key', 'data');
+            expect(result).toBe(false);
+
+            setItemSpy.mockRestore();
+        });
+
+        it('should call quota exceeded callback on QuotaExceededError', () => {
+            const callback = vi.fn();
+            setQuotaExceededCallback(callback);
+
+            const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+            const error = new Error('QuotaExceededError');
+            error.name = 'QuotaExceededError';
+            setItemSpy.mockImplementation(() => { throw error; });
+
+            set('test-key', 'data');
+
+            expect(callback).toHaveBeenCalledWith(error);
+
+            setItemSpy.mockRestore();
+        });
+
+        it('should remove expired entries on get', () => {
+            const key = 'expired-key';
+            const imageData = 'base64';
+
+            const now = Date.now();
+            vi.spyOn(Date, 'now').mockReturnValue(now);
+
+            set(key, imageData);
+
+            // Advance time past TTL (25 hours)
+            vi.spyOn(Date, 'now').mockReturnValue(now + 25 * 60 * 60 * 1000);
+
+            const retrieved = get(key);
+            expect(retrieved).toBeNull();
+
+            // Verify it was removed from storage
+            const inStorage = localStorage.getItem(key);
+            expect(inStorage).toBeNull();
+        });
+    });
+
+    describe('getCached', () => {
+        it('should retrieve cached image by params', () => {
+            const params = { prompt: 'test', model: 'fluently-xl', seed: 42 };
+            const imageData = 'base64image';
+
+            const key = generateKey(params);
+            set(key, imageData);
+
+            const retrieved = getCached(params);
+            expect(retrieved).toBe(imageData);
+        });
+
+        it('should return null for uncached params', () => {
+            const params = { prompt: 'test', model: 'fluently-xl', seed: 42 };
+            const retrieved = getCached(params);
+            expect(retrieved).toBeNull();
+        });
+    });
+
+    describe('cleanup', () => {
+        it('should remove expired entries when all=false', () => {
+            const key1 = 'expired-key';
+            const key2 = 'valid-key';
+
+            const now = Date.now();
+            vi.spyOn(Date, 'now').mockReturnValue(now);
+
+            set(key1, 'data1');
+            set(key2, 'data2');
+
+            // Advance time past TTL for first entry
+            vi.spyOn(Date, 'now').mockReturnValue(now + 25 * 60 * 60 * 1000);
+
+            const removed = cleanup(false);
+
+            expect(removed).toBeGreaterThan(0);
+            expect(get(key1)).toBeNull();
+
+            // Valid entry should still exist
+            vi.spyOn(Date, 'now').mockReturnValue(now + 23 * 60 * 60 * 1000);
+            expect(get(key2)).toBe('data2');
+        });
+
+        it('should remove all entries when all=true', () => {
+            set('key1', 'data1');
+            set('key2', 'data2');
+            set('key3', 'data3');
+
+            const removed = cleanup(true);
+
+            expect(removed).toBe(3);
+            expect(get('key1')).toBeNull();
+            expect(get('key2')).toBeNull();
+            expect(get('key3')).toBeNull();
+        });
+
+        it('should remove malformed entries', () => {
+            const malformedKey = 'venice-image-cache-v1:malformed';
+            localStorage.setItem(malformedKey, 'invalid-json');
+
+            const removed = cleanup(false);
+
+            expect(removed).toBeGreaterThan(0);
+            expect(localStorage.getItem(malformedKey)).toBeNull();
+        });
+    });
+
+    describe('getStats', () => {
+        it('should return accurate cache statistics', () => {
+            set('key1', 'a'.repeat(100));
+            set('key2', 'b'.repeat(200));
+            set('key3', 'c'.repeat(300));
+
+            const stats = getStats();
+
+            expect(stats.count).toBe(3);
+            expect(stats.size).toBeTruthy();
+            expect(stats.sizeKB).toBeTruthy();
+            expect(stats.sizeMB).toBeTruthy();
+            expect(typeof stats.count).toBe('number');
+            expect(typeof stats.size).toBe('string');
+        });
+
+        it('should count expired entries', () => {
+            const now = Date.now();
+            vi.spyOn(Date, 'now').mockReturnValue(now);
+
+            set('key1', 'data1');
+            set('key2', 'data2');
+
+            // Advance time past TTL
+            vi.spyOn(Date, 'now').mockReturnValue(now + 25 * 60 * 60 * 1000);
+
+            const stats = getStats();
+
+            expect(stats.count).toBe(2);
+            expect(stats.expired).toBe(2);
+        });
+
+        it('should return zero stats for empty cache', () => {
+            const stats = getStats();
+
+            expect(stats.count).toBe(0);
+            expect(stats.expired).toBe(0);
+            expect(stats.size).toBe('0 bytes');
+        });
+    });
+
+    describe('Edge Cases', () => {
+        it('should handle localStorage being unavailable', () => {
+            const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
+            getItemSpy.mockImplementation(() => { throw new Error('Storage unavailable'); });
+
+            const result = get('any-key');
+            expect(result).toBeNull();
+
+            getItemSpy.mockRestore();
+        });
+
+        it('should handle corrupted cache entries', () => {
+            const key = 'corrupted-key';
+            localStorage.setItem(key, '{invalid json}');
+
+            const result = get(key);
+            expect(result).toBeNull();
+        });
+
+        it('should handle missing timestamp in cache entry', () => {
+            const key = 'no-timestamp-key';
+            const badEntry = { data: 'test' }; // Missing timestamp
+            localStorage.setItem(key, JSON.stringify(badEntry));
+
+            // Should handle gracefully
+            const result = get(key);
+            // Will be null or throw, both are acceptable
+            expect([null, undefined]).toContain(result);
+        });
+    });
+
+    describe('Functional Programming Compliance', () => {
+        it('should not mutate input parameters', () => {
+            const params = { prompt: 'test', seed: 123 };
+            const originalParams = { ...params };
+
+            generateKey(params);
+
+            expect(params).toEqual(originalParams);
+        });
+
+        it('should be side-effect free except for localStorage', () => {
+            const params = { prompt: 'test', seed: 123 };
+
+            // Multiple calls to generateKey should be consistent
+            const calls = Array.from({ length: 10 }, () => generateKey(params));
+            const allSame = calls.every(key => key === calls[0]);
+
+            expect(allSame).toBe(true);
+        });
+    });
+});
