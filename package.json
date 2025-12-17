@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Uncensored AI image generator with persistent history, chat features, and Web3 transactions powered by Venice.ai",
   "type": "module",
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
   "author": "Venice Generator Contributors",
   "license": "MIT",
   "keywords": [
