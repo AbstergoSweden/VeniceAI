@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 /**
  * Transactions component for interacting with the Ethereum blockchain.
  * Allows users to send ETH and view transaction history.
+ * @returns {JSX.Element} The Transactions component JSX.
  */
 const Transactions = () => {
     const [currentAccount, setCurrentAccount] = useState("");
@@ -42,6 +43,7 @@ const Transactions = () => {
 
     /**
      * Fetches all transactions from the blockchain.
+     * @returns {Promise<void>}
      */
     const getAllTransactions = useCallback(async () => {
         try {
@@ -68,6 +70,7 @@ const Transactions = () => {
 
     /**
      * Connects the wallet to the application.
+     * @returns {Promise<void>}
      */
     const connectWallet = useCallback(async () => {
         try {
@@ -82,20 +85,21 @@ const Transactions = () => {
 
     /**
      * Sends a transaction to the blockchain.
-     * 
+     *
      * KNOWN ISSUE: Transaction Atomicity
-     * 
+     *
      * This function performs two separate user actions:
      * 1. Sends ETH via ethereum.request (lines 109-117)
      * 2. Records transaction in smart contract via contract.addToBlockchain (line 119)
-     * 
+     *
      * If the user approves step 1 but rejects step 2, or if step 2 fails,
      * the funds are transferred but not recorded in the application's history.
-     * 
+     *
      * PROPER FIX: The smart contract should be rewritten to accept the payable
      * amount and forward it to the receiver in a single atomic transaction.
      * This would require modifying the contract's addToBlockchain function to
      * be payable and handle the ETH transfer internally.
+     * @returns {Promise<void>}
      */
     const sendTransaction = async () => {
         const { addressTo, amount, keyword, message } = formData;
@@ -147,6 +151,7 @@ const Transactions = () => {
      * Handles form input changes.
      * @param {Event} e - The input change event.
      * @param {string} name - The name of the field being changed.
+     * @returns {void}
      */
     const handleChange = (e, name) => {
         setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));

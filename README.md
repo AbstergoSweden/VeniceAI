@@ -393,6 +393,114 @@ artifacts/
 
 ---
 
+## Documentation Standards
+
+This project follows JSDoc-style documentation standards for JavaScript/JSX code:
+
+- Functions and methods include `@param` tags with type definitions
+- Return values are documented with `@returns` tags
+- React components document their props and expected behavior
+- Complex business logic includes inline explanations
+- TypeScript-style type definitions where applicable
+
+---
+
+## Code Structure
+
+### Directory Structure
+
+```
+src/
+├── App.jsx                 # Main application component
+├── components/             # Reusable UI components
+│   ├── ChatPanel.jsx       # Integrated chat interface
+│   ├── Transactions.jsx    # Web3 transaction interface
+│   └── ErrorBoundary.jsx   # Error handling wrapper
+├── utils/                  # Reusable utility functions
+│   ├── api.js              # API communication logic
+│   ├── image.js            # Image processing functions
+│   ├── cache.js            # Image caching utilities
+│   ├── constants.js        # Configuration constants
+│   └── config.js           # Application configuration
+└── test/                   # Test setup and utilities
+    ├── setup.js            # Test environment setup
+    ├── ChatPanel.test.jsx  # Chat component tests
+    ├── Transactions.test.jsx # Transaction component tests
+    └── ...                 # Other test files
+```
+
+---
+
+## Development Best Practices
+
+### Component Design
+
+- Use React functional components with hooks
+- Implement proper error boundaries for resilience
+- Follow Material Design 3 principles
+- Implement responsive design for all screen sizes
+- Ensure accessibility with ARIA labels and semantic HTML
+
+### State Management
+
+- Use React hooks (`useState`, `useEffect`, `useCallback`) appropriately
+- Separate local and global state concerns
+- Implement proper cleanup in `useEffect` hooks
+- Use `useCallback` to prevent unnecessary re-renders
+
+### Error Handling
+
+- Implement centralized error logging
+- Use toast notifications for user-facing errors
+- Gracefully handle API failures with fallbacks
+- Implement proper form validation
+- Use error boundaries to prevent app crashes
+
+### Performance Optimization
+
+- Implement image caching to reduce API calls
+- Use lazy loading for heavy components
+- Optimize image compression to reduce memory usage
+- Implement virtual scrolling for large datasets
+- Use React.memo for expensive components
+
+## Testing Strategy
+
+### Test Coverage
+
+This project includes comprehensive test coverage with:
+
+- **Unit Tests**: Testing individual functions and utilities
+- **Component Tests**: Testing React components with user interactions
+- **Integration Tests**: Testing API interactions and state management
+- **Regression Tests**: Ensuring bug fixes remain fixed
+
+### Test Structure
+
+Tests are organized by:
+
+- `src/utils/*.test.js` - Utility function tests
+- `src/test/*test.jsx` - Component and integration tests
+- `src/App.test.jsx` - Main application tests
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+
+# Run specific test file
+npx vitest path/to/test/file.test.js
+```
+
+---
+
 ## Troubleshooting
 
 ### Firebase Authentication Fails
@@ -470,6 +578,14 @@ Found a bug? Please open an issue with:
 5. Commit your changes (`git commit -m 'Add amazing feature'`)
 6. Push to the branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
+
+### Code Quality Requirements
+
+- All code must include proper JSDoc documentation
+- Tests must be added for new functionality
+- Existing tests must continue to pass
+- Code must pass linting checks
+- Follow existing code style and patterns
 
 ---
 

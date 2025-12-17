@@ -6,12 +6,21 @@ class ErrorBoundary extends React.Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
+  /**
+   * @param {Error} error - The error that was thrown
+   * @returns {Object} The new state object
+   */
   static getDerivedStateFromError(error) {
     // Update state so the next render will show the fallback UI.
     // Note: error parameter required by React API but unused in this implementation
     return { hasError: true, error };
   }
 
+  /**
+   * @param {Error} error - The error that was caught
+   * @param {Object} errorInfo - Information about the error
+   * @returns {void}
+   */
   componentDidCatch(error, errorInfo) {
     // You can also log the error to an error reporting service
     console.error('Error caught by boundary:', error, errorInfo);
@@ -21,6 +30,9 @@ class ErrorBoundary extends React.Component {
     });
   }
 
+  /**
+   * @returns {JSX.Element} The component's rendered output
+   */
   render() {
     if (this.state.hasError) {
       // You can render any custom fallback UI

@@ -15,6 +15,7 @@ const Transactions = lazy(() => import('./components/Transactions'));
  * Loading component for lazy-loaded components.
  * @param {object} props - Component props.
  * @param {string} [props.message="Loading..."] - The message to display while loading.
+ * @returns {JSX.Element} The loading component JSX.
  */
 const LoadingComponent = ({ message = "Loading..." }) => (
     <div className="flex flex-col items-center justify-center p-8">
@@ -113,6 +114,7 @@ try {
 /**
  * Main Application Component.
  * Handles the state and logic for the image generator, chat, and history.
+ * @returns {JSX.Element} The main application JSX component.
  */
 export default function App() {
     // --- STATE ---
@@ -159,6 +161,7 @@ export default function App() {
      * Shows a toast notification.
      * @param {string} message - The message to display.
      * @param {string} [type='info'] - The type of toast ('info', 'success', 'warning', 'error').
+     * @returns {void}
      */
     const showToast = (message, type = 'info') => {
         setToast({ show: true, message, type });
@@ -309,6 +312,7 @@ export default function App() {
 
     /**
      * Handles generating a prompt suggestion based on a user idea.
+     * @returns {Promise<void>}
      */
     const handleSuggest = async () => {
         const idea = window.prompt("Enter a simple idea (e.g., 'a cyberpunk city'):");
@@ -324,6 +328,7 @@ export default function App() {
 
     /**
      * Handles enhancing the current prompt.
+     * @returns {Promise<void>}
      */
     const handleEnhancePrompt = async () => {
         if (!prompt) return alert("Please enter a prompt first.");
@@ -340,6 +345,7 @@ export default function App() {
     /**
      * Handles image upload for description.
      * @param {Event} e - The file input change event.
+     * @returns {void}
      */
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
@@ -361,6 +367,7 @@ export default function App() {
 
     /**
      * Generates a description for the uploaded image.
+     * @returns {Promise<void>}
      */
     const handleDescribeImage = async () => {
         if (!uploadedImage) return;
@@ -387,6 +394,7 @@ export default function App() {
 
     /**
      * Uses the generated image description as the main prompt.
+     * @returns {void}
      */
     const handleUseDescription = () => {
         if (imageDescription) {
@@ -401,6 +409,7 @@ export default function App() {
     /**
      * Handles the image generation process.
      * @param {Event} e - Form submission event.
+     * @returns {Promise<void>}
      */
     const handleGenerate = async (e) => {
         e.preventDefault();
@@ -437,6 +446,7 @@ export default function App() {
                     ...(selectedStyle !== 'none' && { style_preset: selectedStyle })
                 };
 
+                // Include the index to properly correlate the response with the request
                 const p = apiCall(`${CONFIG.BASE_API_URL}/image/generate`, requestData, CONFIG)
                     .then(async (result) => {
                         setStatusMessage(`Compressing image ${i + 1}...`);
@@ -449,29 +459,46 @@ export default function App() {
 
                         const itemToSave = {
                             base64: compressed,
+                            // Ensure the correct seed is preserved
                             params: { ...requestData, seed: currentSeed, timestamp: Date.now() }
                         };
 
                         const collectionPath = `artifacts/${appId}/users/${user.uid}/${CONFIG.COLLECTION_NAME}`;
 
                         try {
+                            // Store with the correct document reference
                             await addDoc(collection(db, ...collectionPath.split('/')), itemToSave);
                         } catch (dbErr) {
                             console.warn("Failed to save to firestore", dbErr);
                             // We still want to show it in ephemeral state if we could
-                            // Add a temporary ID for React key
-                            setHistory(prev => [{ ...itemToSave, id: `offline-${Date.now()}-${currentSeed}` }, ...prev]);
+                            // Add a temporary ID that includes the seed for proper identification
+                            const tempId = `offline-${Date.now()}-${currentSeed}`;
+                            setHistory(prev => [{ ...itemToSave, id: tempId }, ...prev]);
                         }
+
+                        // Return the result with its index to ensure proper ordering if needed
+                        return { index: i, item: itemToSave, success: true };
+                    })
+                    .catch(error => {
+                        // Return error with index to identify which variant failed
+                        return { index: i, error, success: false };
                     });
+
                 promises.push(p);
             }
             const results = await Promise.allSettled(promises);
 
-            const failed = results.filter(r => r.status === 'rejected');
-            const successful = results.filter(r => r.status === 'fulfilled');
+            // Process results and check for failures
+            const successful = results
+                .filter(r => r.status === 'fulfilled' && r.value.success)
+                .map(r => r.value);
+
+            const failed = results
+                .filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success))
+                .map(r => r.status === 'rejected' ? { reason: r.reason } : { reason: r.value.error });
 
             if (successful.length === 0 && failed.length > 0) {
-                throw failed[0].reason;
+                throw failed[0].reason || new Error("All image generations failed");
             }
 
             if (failed.length > 0) {
@@ -513,6 +540,7 @@ export default function App() {
     /**
      * Opens the enhancement modal for a selected image.
      * @param {object} item - The history item to enhance.
+     * @returns {void}
      */
     const openEnhanceModal = (item) => {
         setEnhanceTarget(item);
@@ -524,6 +552,7 @@ export default function App() {
     /**
      * Submits the image enhancement request.
      * @param {Event} e - Form submission event.
+     * @returns {Promise<void>}
      */
     const handleEnhanceSubmit = async (e) => {
         e.preventDefault();
@@ -584,6 +613,7 @@ export default function App() {
 
     /**
      * Clears all generated image history.
+     * @returns {Promise<void>}
      */
     const clearHistory = async () => {
         if (!window.confirm("Are you sure you want to delete all history?")) return;
@@ -618,6 +648,7 @@ export default function App() {
      * Downloads the generated image.
      * @param {string} base64 - Base64 string of the image.
      * @param {string} seed - Seed used for generation (for filename).
+     * @returns {void}
      */
     const downloadImage = (base64, seed) => {
         const link = document.createElement('a');
