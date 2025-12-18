@@ -24,11 +24,10 @@ const ChatMessage = ({ role, content }) => {
         >
             <Motion.div
                 whileHover={{ scale: 1.01 }}
-                className={`max-w-[75%] p-4 rounded-2xl backdrop-blur-md shadow-lg border border-white/5 ${
-                    isUser
+                className={`max-w-[75%] p-4 rounded-2xl backdrop-blur-md shadow-lg border border-white/5 ${isUser
                         ? 'bg-primary/90 text-on-primary rounded-tr-sm'
                         : 'bg-surface-container-high/80 text-on-surface rounded-tl-sm'
-                }`}
+                    }`}
             >
                 <p className="text-[15px] leading-7 tracking-wide font-normal">{content}</p>
             </Motion.div>
@@ -158,7 +157,8 @@ const ChatPanel = ({
         } else if (!systemPrompt && !savedPrompt) {
             setSystemPrompt(DEFAULT_SYSTEM_PROMPT);
         }
-    }, [systemPrompt, setSystemPrompt]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Fix Bug #4: Only run on mount to prevent infinite loop
 
     // Persist system prompt to localStorage
     useEffect(() => {
@@ -262,11 +262,11 @@ const ChatPanel = ({
                         className="flex justify-start mb-4"
                     >
                         <div className="bg-surface-container-high/50 p-4 rounded-2xl rounded-tl-sm backdrop-blur-sm border border-white/5">
-                           <div className="flex space-x-2">
+                            <div className="flex space-x-2">
                                 <Skeleton className="w-2 h-2 rounded-full bg-primary/40" />
                                 <Skeleton className="w-2 h-2 rounded-full bg-primary/40 delay-75" />
                                 <Skeleton className="w-2 h-2 rounded-full bg-primary/40 delay-150" />
-                           </div>
+                            </div>
                         </div>
                     </Motion.div>
                 )}

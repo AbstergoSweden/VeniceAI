@@ -6,6 +6,7 @@ import { Sparkles, Trash2, Download, Wand2, Image as ImageIcon, Loader2, Refresh
 import { apiCall } from './utils/api';
 import { compressImage } from './utils/image';
 import imageCache from './utils/cache';
+import { syncVeniceModels, DEFAULT_CHAT_MODELS } from './utils/modelSync';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 // Lazy load heavy components
@@ -36,18 +37,9 @@ const CONFIG = {
 };
 
 // --- VENICE CHAT MODELS ---
-const VENICE_CHAT_MODELS = [
-    { id: 'mistral-31-24b', name: 'Venice Medium', vision: true, reasoning: false },
-    { id: 'grok-41-fast', name: 'Grok 4.1 Fast', vision: true, reasoning: true },
-    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', vision: true, reasoning: true },
-    { id: 'claude-opus-45', name: 'Claude Opus 4.5', vision: true, reasoning: true },
-    { id: 'google-gemma-3-27b-it', name: 'Google Gemma 3 27B', vision: true, reasoning: false },
-    { id: 'qwen3-235b-a22b-instruct-2507', name: 'Qwen 3 235B Instruct', vision: false, reasoning: false },
-    { id: 'qwen3-235b-a22b-thinking-2507', name: 'Qwen 3 235B Thinking', vision: false, reasoning: true },
-    { id: 'openai-gpt-52', name: 'GPT-5.2', vision: false, reasoning: true },
-];
-
-const DEFAULT_CHAT_MODEL = 'mistral-31-24b'; // Venice Medium - vision capable
+// Models are now dynamically fetched from API via modelSync utility
+// DEFAULT_CHAT_MODELS imported from ./utils/modelSync as fallback
+const DEFAULT_CHAT_MODEL = DEFAULT_CHAT_MODELS[0]?.id || 'mistral-31-24b'; // Venice Medium - vision capable
 
 // --- VENICE PROMPT ENGINEERING SYSTEM PROMPT ---
 const VENICE_SYSTEM_PROMPT = `You are an expert prompt engineer specializing in creating highly detailed, evocative prompts for AI image generation (Midjourney, Stable Diffusion, DALL-E, etc.).
@@ -137,6 +129,7 @@ export default function App() {
     // Data Lists
     const [modelsList, setModelsList] = useState([]);
     const [stylesList, setStylesList] = useState([]);
+    const [chatModels, setChatModels] = useState(DEFAULT_CHAT_MODELS); // Chat models from sync
 
     // UI State
 
@@ -227,6 +220,26 @@ export default function App() {
             }
         };
         fetchData();
+    }, []);
+
+    // 2b. Sync Chat Models
+    useEffect(() => {
+        const syncModels = async () => {
+            if (CONFIG.API_KEYS.length === 0) {
+                console.warn('[ModelSync] No API keys available, using defaults');
+                return;
+            }
+
+            try {
+                const models = await syncVeniceModels(CONFIG.API_KEYS[0], CONFIG.BASE_API_URL);
+                setChatModels(models);
+                console.log(`[ModelSync] Loaded ${models.length} chat models`);
+            } catch (error) {
+                console.error('[ModelSync] Failed to sync models:', error);
+                // Keep using defaults
+            }
+        };
+        syncModels();
     }, []);
 
     // 3. Firestore Listener
@@ -376,7 +389,7 @@ export default function App() {
         setDescribingImage(true);
         try {
             // Use a vision-capable model
-            const visionModel = VENICE_CHAT_MODELS.find(m => m.vision)?.id || DEFAULT_CHAT_MODEL;
+            const visionModel = chatModels.find(m => m.vision)?.id || DEFAULT_CHAT_MODEL;
             const description = await callVeniceChat(
                 "Describe this image in detail, focusing on elements that would be useful for creating a similar image with AI. Include details about subjects, composition, lighting, color palette, mood, and artistic style.",
                 VENICE_SYSTEM_PROMPT,
@@ -913,206 +926,206 @@ export default function App() {
 
             {/* Enhancement Modal */}
             <AnimatePresence>
-            {enhanceModalOpen && (
-                <Motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="m3-dialog-scrim fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/50 backdrop-blur-sm"
-                >
+                {enhanceModalOpen && (
                     <Motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.9, opacity: 0 }}
-                        className="m3-dialog w-full max-w-md overflow-hidden bg-surface-container rounded-2xl shadow-2xl border border-white/10"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="m3-dialog-scrim fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/50 backdrop-blur-sm"
                     >
-                        <div className="p-6 border-b border-outline-variant flex justify-between items-center">
-                            <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><Wand2 className="text-tertiary" /> Enhance Image</h3>
-                            <button onClick={() => setEnhanceModalOpen(false)} className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest" aria-label="Close enhancement modal"><X className="w-5 h-5" /></button>
-                        </div>
-                        <div className="p-6 space-y-5">
-                            {enhanceTarget && (
-                                <div className="flex gap-4 items-center bg-surface-container p-4 rounded-xl border border-outline-variant">
-                                    <img src={`data:image/jpeg;base64,${enhanceTarget.base64}`} className="w-16 h-16 rounded-lg object-cover border border-outline-variant" alt="Target" />
-                                    <div className="text-xs text-on-surface-variant">
-                                        <p className="font-semibold text-on-surface">Selected Image</p>
-                                        <p className="mt-1">Seed: <span className="text-primary">{enhanceTarget.params?.seed}</span></p>
+                        <Motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="m3-dialog w-full max-w-md overflow-hidden bg-surface-container rounded-2xl shadow-2xl border border-white/10"
+                        >
+                            <div className="p-6 border-b border-outline-variant flex justify-between items-center">
+                                <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><Wand2 className="text-tertiary" /> Enhance Image</h3>
+                                <button onClick={() => setEnhanceModalOpen(false)} className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest" aria-label="Close enhancement modal"><X className="w-5 h-5" /></button>
+                            </div>
+                            <div className="p-6 space-y-5">
+                                {enhanceTarget && (
+                                    <div className="flex gap-4 items-center bg-surface-container p-4 rounded-xl border border-outline-variant">
+                                        <img src={`data:image/jpeg;base64,${enhanceTarget.base64}`} className="w-16 h-16 rounded-lg object-cover border border-outline-variant" alt="Target" />
+                                        <div className="text-xs text-on-surface-variant">
+                                            <p className="font-semibold text-on-surface">Selected Image</p>
+                                            <p className="mt-1">Seed: <span className="text-primary">{enhanceTarget.params?.seed}</span></p>
+                                        </div>
                                     </div>
+                                )}
+                                <div>
+                                    <label className="block text-sm font-medium text-on-surface mb-2">Enhancement Prompt (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={enhancePrompt}
+                                        onChange={(e) => setEnhancePrompt(e.target.value)}
+                                        className="m3-textfield w-full rounded-lg"
+                                        placeholder="e.g., cinematic lighting, hyperrealistic, 8k"
+                                    />
                                 </div>
-                            )}
-                            <div>
-                                <label className="block text-sm font-medium text-on-surface mb-2">Enhancement Prompt (Optional)</label>
-                                <input
-                                    type="text"
-                                    value={enhancePrompt}
-                                    onChange={(e) => setEnhancePrompt(e.target.value)}
-                                    className="m3-textfield w-full rounded-lg"
-                                    placeholder="e.g., cinematic lighting, hyperrealistic, 8k"
-                                />
-                            </div>
-                            <div>
-                                <div className="flex justify-between text-sm text-on-surface mb-2">
-                                    <span>Creative Intensity</span> <span className="text-primary font-medium">{enhanceCreativity}</span>
+                                <div>
+                                    <div className="flex justify-between text-sm text-on-surface mb-2">
+                                        <span>Creative Intensity</span> <span className="text-primary font-medium">{enhanceCreativity}</span>
+                                    </div>
+                                    <input
+                                        type="range" min="0" max="1" step="0.1"
+                                        value={enhanceCreativity}
+                                        onChange={(e) => setEnhanceCreativity(e.target.value)}
+                                        className="m3-slider w-full"
+                                    />
+                                    <p className="text-[10px] text-on-surface-variant mt-1.5">Higher values allow the AI to deviate more from the original image.</p>
                                 </div>
-                                <input
-                                    type="range" min="0" max="1" step="0.1"
-                                    value={enhanceCreativity}
-                                    onChange={(e) => setEnhanceCreativity(e.target.value)}
-                                    className="m3-slider w-full"
-                                />
-                                <p className="text-[10px] text-on-surface-variant mt-1.5">Higher values allow the AI to deviate more from the original image.</p>
                             </div>
-                        </div>
-                        <div className="p-6 border-t border-outline-variant bg-surface-container-low flex justify-end gap-3">
-                            <button onClick={() => setEnhanceModalOpen(false)} className="m3-button-outlined px-4 py-2 text-sm">Cancel</button>
-                            <button onClick={handleEnhanceSubmit} className="m3-button-filled px-4 py-2 text-sm !bg-tertiary !text-on-tertiary">Apply Enhancement</button>
-                        </div>
+                            <div className="p-6 border-t border-outline-variant bg-surface-container-low flex justify-end gap-3">
+                                <button onClick={() => setEnhanceModalOpen(false)} className="m3-button-outlined px-4 py-2 text-sm">Cancel</button>
+                                <button onClick={handleEnhanceSubmit} className="m3-button-filled px-4 py-2 text-sm !bg-tertiary !text-on-tertiary">Apply Enhancement</button>
+                            </div>
+                        </Motion.div>
                     </Motion.div>
-                </Motion.div>
-            )}
+                )}
             </AnimatePresence>
 
             {/* Image Description Modal */}
             <AnimatePresence>
-            {describeModalOpen && (
-                <Motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="m3-dialog-scrim fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/50 backdrop-blur-sm"
-                >
+                {describeModalOpen && (
                     <Motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.9, opacity: 0 }}
-                        className="m3-dialog w-full max-w-lg overflow-hidden bg-surface-container rounded-2xl shadow-2xl border border-white/10"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="m3-dialog-scrim fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/50 backdrop-blur-sm"
                     >
-                        <div className="p-6 border-b border-outline-variant flex justify-between items-center">
-                            <h3 className="text-xl font-bold text-on-surface flex items-center gap-2">
-                                <ImageIcon className="text-tertiary" /> Describe Image
-                            </h3>
-                            <button onClick={() => {
-                                setDescribeModalOpen(false);
-                                setUploadedImage(null);
-                                setImageDescription('');
-                            }} className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest" aria-label="Close image description modal">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            {/* Upload Area */}
-                            {!uploadedImage ? (
-                                <div className="border-2 border-dashed border-outline-variant rounded-2xl p-10 text-center hover:border-primary transition-colors cursor-pointer group">
-                                    <input
-                                        type="file"
-                                        id="image-upload"
-                                        accept="image/*"
-                                        onChange={handleImageUpload}
-                                        className="hidden"
-                                    />
-                                    <label htmlFor="image-upload" className="cursor-pointer">
-                                        <ImageIcon className="w-14 h-14 mx-auto mb-3 text-on-surface-variant opacity-50 group-hover:text-primary group-hover:opacity-80 transition" />
-                                        <p className="text-sm text-on-surface-variant mb-1">Click to upload an image</p>
-                                        <p className="text-xs text-on-surface-variant opacity-60">PNG, JPG, WEBP up to 10MB</p>
-                                    </label>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="relative">
-                                        <img
-                                            src={`data:image/jpeg;base64,${uploadedImage}`}
-                                            alt="Uploaded"
-                                            className="w-full h-48 object-contain rounded-xl bg-surface-container border border-outline-variant"
+                        <Motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="m3-dialog w-full max-w-lg overflow-hidden bg-surface-container rounded-2xl shadow-2xl border border-white/10"
+                        >
+                            <div className="p-6 border-b border-outline-variant flex justify-between items-center">
+                                <h3 className="text-xl font-bold text-on-surface flex items-center gap-2">
+                                    <ImageIcon className="text-tertiary" /> Describe Image
+                                </h3>
+                                <button onClick={() => {
+                                    setDescribeModalOpen(false);
+                                    setUploadedImage(null);
+                                    setImageDescription('');
+                                }} className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest" aria-label="Close image description modal">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {/* Upload Area */}
+                                {!uploadedImage ? (
+                                    <div className="border-2 border-dashed border-outline-variant rounded-2xl p-10 text-center hover:border-primary transition-colors cursor-pointer group">
+                                        <input
+                                            type="file"
+                                            id="image-upload"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            className="hidden"
                                         />
-                                        <button
-                                            onClick={() => {
-                                                setUploadedImage(null);
-                                                setImageDescription('');
-                                            }}
-                                            className="absolute top-2 right-2 p-1.5 bg-error hover:bg-error/80 text-on-error rounded-full transition shadow-elevation-2"
-                                            aria-label="Remove uploaded image"
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </button>
+                                        <label htmlFor="image-upload" className="cursor-pointer">
+                                            <ImageIcon className="w-14 h-14 mx-auto mb-3 text-on-surface-variant opacity-50 group-hover:text-primary group-hover:opacity-80 transition" />
+                                            <p className="text-sm text-on-surface-variant mb-1">Click to upload an image</p>
+                                            <p className="text-xs text-on-surface-variant opacity-60">PNG, JPG, WEBP up to 10MB</p>
+                                        </label>
                                     </div>
-
-                                    {!imageDescription && (
-                                        <button
-                                            onClick={handleDescribeImage}
-                                            disabled={describingImage}
-                                            className={`m3-button-filled w-full py-3 font-medium flex items-center justify-center gap-2 ${describingImage
-                                                ? '!bg-surface-container-high !text-on-surface-variant cursor-not-allowed'
-                                                : '!bg-tertiary !text-on-tertiary'
-                                                }`}
-                                        >
-                                            {describingImage ? (
-                                                <><Loader2 className="w-4 h-4 animate-spin" /> Analyzing Image...</>
-                                            ) : (
-                                                <><Wand2 className="w-4 h-4" /> Describe Image</>
-                                            )}
-                                        </button>
-                                    )}
-
-                                    {imageDescription && (
-                                        <div className="space-y-3">
-                                            <div className="bg-surface-container rounded-xl p-4 border border-outline-variant">
-                                                <p className="text-sm text-on-surface leading-relaxed">{imageDescription}</p>
-                                            </div>
-                                            <div className="flex gap-3">
-                                                <button
-                                                    onClick={handleDescribeImage}
-                                                    disabled={describingImage}
-                                                    className="m3-button-outlined flex-1 py-2.5 text-sm"
-                                                >
-                                                    Re-analyze
-                                                </button>
-                                                <button
-                                                    onClick={handleUseDescription}
-                                                    className="m3-button-filled flex-1 py-2.5 text-sm !bg-primary !text-on-primary"
-                                                >
-                                                    Use as Prompt
-                                                </button>
-                                            </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="relative">
+                                            <img
+                                                src={`data:image/jpeg;base64,${uploadedImage}`}
+                                                alt="Uploaded"
+                                                className="w-full h-48 object-contain rounded-xl bg-surface-container border border-outline-variant"
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    setUploadedImage(null);
+                                                    setImageDescription('');
+                                                }}
+                                                className="absolute top-2 right-2 p-1.5 bg-error hover:bg-error/80 text-on-error rounded-full transition shadow-elevation-2"
+                                                aria-label="Remove uploaded image"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
                                         </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+
+                                        {!imageDescription && (
+                                            <button
+                                                onClick={handleDescribeImage}
+                                                disabled={describingImage}
+                                                className={`m3-button-filled w-full py-3 font-medium flex items-center justify-center gap-2 ${describingImage
+                                                    ? '!bg-surface-container-high !text-on-surface-variant cursor-not-allowed'
+                                                    : '!bg-tertiary !text-on-tertiary'
+                                                    }`}
+                                            >
+                                                {describingImage ? (
+                                                    <><Loader2 className="w-4 h-4 animate-spin" /> Analyzing Image...</>
+                                                ) : (
+                                                    <><Wand2 className="w-4 h-4" /> Describe Image</>
+                                                )}
+                                            </button>
+                                        )}
+
+                                        {imageDescription && (
+                                            <div className="space-y-3">
+                                                <div className="bg-surface-container rounded-xl p-4 border border-outline-variant">
+                                                    <p className="text-sm text-on-surface leading-relaxed">{imageDescription}</p>
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <button
+                                                        onClick={handleDescribeImage}
+                                                        disabled={describingImage}
+                                                        className="m3-button-outlined flex-1 py-2.5 text-sm"
+                                                    >
+                                                        Re-analyze
+                                                    </button>
+                                                    <button
+                                                        onClick={handleUseDescription}
+                                                        className="m3-button-filled flex-1 py-2.5 text-sm !bg-primary !text-on-primary"
+                                                    >
+                                                        Use as Prompt
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </Motion.div>
                     </Motion.div>
-                </Motion.div>
-            )}
+                )}
             </AnimatePresence>
 
             {/* Toast Notification */}
             <AnimatePresence>
-            {toast.show && (
-                <Motion.div
-                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                    className={`fixed bottom-4 right-4 z-50 p-4 rounded-2xl shadow-elevation-4 border backdrop-blur-sm max-w-md ${toast.type === 'success' ? 'bg-success-container/95 border-success/30 text-on-success-container' :
-                    toast.type === 'warning' ? 'bg-warning-container/95 border-warning/30 text-on-warning-container' :
-                        toast.type === 'error' ? 'bg-error-container/95 border-error/30 text-on-error-container' :
-                            'bg-info-container/95 border-info/30 text-on-info-container'
-                    }`}>
-                    <div className="flex items-start gap-3">
-                        {toast.type === 'success' && <div className="text-success text-lg">✓</div>}
-                        {toast.type === 'warning' && <div className="text-warning text-lg">⚠</div>}
-                        {toast.type === 'error' && <div className="text-error text-lg">✕</div>}
-                        {toast.type === 'info' && <div className="text-info text-lg">ℹ</div>}
-                        <div className="flex-1">
-                            <p className="text-sm font-medium">{toast.message}</p>
+                {toast.show && (
+                    <Motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                        className={`fixed bottom-4 right-4 z-50 p-4 rounded-2xl shadow-elevation-4 border backdrop-blur-sm max-w-md ${toast.type === 'success' ? 'bg-success-container/95 border-success/30 text-on-success-container' :
+                            toast.type === 'warning' ? 'bg-warning-container/95 border-warning/30 text-on-warning-container' :
+                                toast.type === 'error' ? 'bg-error-container/95 border-error/30 text-on-error-container' :
+                                    'bg-info-container/95 border-info/30 text-on-info-container'
+                            }`}>
+                        <div className="flex items-start gap-3">
+                            {toast.type === 'success' && <div className="text-success text-lg">✓</div>}
+                            {toast.type === 'warning' && <div className="text-warning text-lg">⚠</div>}
+                            {toast.type === 'error' && <div className="text-error text-lg">✕</div>}
+                            {toast.type === 'info' && <div className="text-info text-lg">ℹ</div>}
+                            <div className="flex-1">
+                                <p className="text-sm font-medium">{toast.message}</p>
+                            </div>
+                            <button
+                                onClick={() => setToast({ show: false, message: '', type: 'info' })}
+                                className="text-on-surface-variant hover:text-on-surface transition p-0.5 rounded-full hover:bg-surface/20"
+                                aria-label="Close notification"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
-                        <button
-                            onClick={() => setToast({ show: false, message: '', type: 'info' })}
-                            className="text-on-surface-variant hover:text-on-surface transition p-0.5 rounded-full hover:bg-surface/20"
-                            aria-label="Close notification"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-                    </div>
-                </Motion.div>
-            )}
+                    </Motion.div>
+                )}
             </AnimatePresence>
         </div>
     );

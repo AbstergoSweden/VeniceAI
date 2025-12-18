@@ -128,6 +128,52 @@ describe('Image Cache Utility', () => {
     });
 
     describe('cleanup', () => {
+        // BUG #1 TEST: This test should fail before the fix and pass after
+        it('should remove ALL expired entries without skipping (Bug #1)', () => {
+            // This test verifies that cleanup doesn't skip expired entries
+            //when iterating through localStorage
+
+            const cachePrefix = 'venice-image-cache-v1:';
+            const now = Date.now();
+
+            // Create 5 entries: 3 will be expired, 2 will be valid
+            // We create them in an interleaved pattern to trigger the skip bug
+            const entries = [
+                { key: `${cachePrefix}item1`, data: 'data1', ageHours: 26 }, // expired
+                { key: `${cachePrefix}item2`, data: 'data2', ageHours: 1 },  // valid
+                { key: `${cachePrefix}item3`, data: 'data3', ageHours: 26 }, // expired
+                { key: `${cachePrefix}item4`, data: 'data4', ageHours: 2 },  // valid
+                { key: `${cachePrefix}item5`, data: 'data5', ageHours: 26 }  // expired
+            ];
+
+            // Manually create cache entries with specific timestamps
+            entries.forEach(entry => {
+                const entryAge = entry.ageHours * 60 * 60 * 1000;
+                const cacheEntry = {
+                    data: entry.data,
+                    timestamp: now - entryAge, // Set timestamp in the past
+                    ttl: 24 * 60 * 60 * 1000 // 24 hour TTL
+                };
+                localStorage.setItem(entry.key, JSON.stringify(cacheEntry));
+            });
+
+            // Mock Date.now to return current time
+            vi.spyOn(Date, 'now').mockReturnValue(now);
+
+            // Run cleanup - should remove only expired entries (3)
+            const removed = cleanup(false);
+
+            // Should remove exactly 3 expired entries
+            expect(removed).toBe(3);
+
+            // Verify specific entries
+            expect(get(entries[0].key)).toBeNull(); // item1 expired
+            expect(get(entries[1].key)).toBe('data2'); // item2 valid
+            expect(get(entries[2].key)).toBeNull(); // item3 expired
+            expect(get(entries[3].key)).toBe('data4'); // item4 valid
+            expect(get(entries[4].key)).toBeNull(); // item5 expired
+        });
+
         it('should remove expired entries when all=false', () => {
             const key1 = 'expired-key';
             const key2 = 'valid-key';

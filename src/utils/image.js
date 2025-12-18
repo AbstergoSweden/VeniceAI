@@ -39,16 +39,18 @@ export const compressImage = async (base64Src, quality = 0.85) => {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0);
                 const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                cleanup(); // Fix Bug #5: Cleanup after successful processing
                 resolve(compressedBase64.split(',')[1]);
-            } finally {
-                cleanup();
+            } catch (err) {
+                cleanup(); // Fix Bug #5: Cleanup on error
+                reject(err);
             }
         };
 
         img.onerror = (e) => {
             loaded = true;
             clearTimeout(timeout);
-            cleanup();
+            cleanup(); // Fix Bug #5: Cleanup on error
             reject(e);
         };
 

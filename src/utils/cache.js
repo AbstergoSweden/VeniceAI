@@ -179,23 +179,32 @@ export const cleanup = (all = false) => {
   if (!all) {
     // Clean up only expired entries
     const now = Date.now();
+
+    // Fix for Bug #1: Collect keys first to avoid iteration issues
+    const keys = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith(CACHE_PREFIX)) {
-        try {
-          const cached = localStorage.getItem(key);
-          const cacheEntry = JSON.parse(cached);
-          if (now - cacheEntry.timestamp > cacheEntry.ttl) {
-            localStorage.removeItem(key);
-            i--; // Adjust index after removal
-            removed++;
-          }
-        } catch {
-          // Remove malformed entries
+        keys.push(key);
+      }
+    }
+
+    // Now iterate through collected keys and remove expired ones
+    for (const key of keys) {
+      try {
+        const cached = localStorage.getItem(key);
+        if (!cached) continue; // Key might have been removed
+
+        const cacheEntry = JSON.parse(cached);
+        if (now - cacheEntry.timestamp > cacheEntry.ttl) {
           localStorage.removeItem(key);
-          i--; // Adjust index after removal
           removed++;
         }
+      } catch (err) {
+        // Remove malformed entries
+        console.warn('Removing malformed cache entry:', key, err.message);
+        localStorage.removeItem(key);
+        removed++;
       }
     }
   } else {

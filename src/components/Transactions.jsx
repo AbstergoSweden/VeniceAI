@@ -21,15 +21,18 @@ const Transactions = () => {
     const { ethereum } = window;
 
     useEffect(() => {
+        let cancelled = false; // Fix Bug #8: Add cleanup flag
         if (ethereum) {
             ethereum.request({ method: 'eth_chainId' })
                 .then(chainId => {
+                    if (cancelled) return; // Fix Bug #8: Check cancellation
                     if (chainId === '0x1') setNetworkPrefix("");
                     else if (chainId === '0xaa36a7') setNetworkPrefix("sepolia.");
                     else if (chainId === '0x5') setNetworkPrefix("goerli.");
                 })
                 .catch(err => console.error("Failed to get chainId", err));
         }
+        return () => { cancelled = true; }; // Fix Bug #8: Cleanup
     }, [ethereum]);
 
     /**
@@ -81,8 +84,8 @@ const Transactions = () => {
     const connectWallet = useCallback(async () => {
         try {
             if (!ethereum) {
-                 setToast({ message: "Please install MetaMask.", type: "error" });
-                 return;
+                setToast({ message: "Please install MetaMask.", type: "error" });
+                return;
             }
             const accounts = await ethereum.request({ method: "eth_requestAccounts" });
             setCurrentAccount(accounts[0]);
@@ -100,8 +103,8 @@ const Transactions = () => {
         const { addressTo, amount, keyword, message } = formData;
         try {
             if (!ethereum) {
-                 setToast({ message: "Please install MetaMask.", type: "error" });
-                 return;
+                setToast({ message: "Please install MetaMask.", type: "error" });
+                return;
             }
 
             // Validate Ethereum address
@@ -116,13 +119,14 @@ const Transactions = () => {
             let parsedAmount;
             try {
                 parsedAmount = parseEther(amount);
-                if (parsedAmount <= 0) {
-                     setToast({ message: "Amount must be greater than zero.", type: "error" });
-                     return;
+                // Fix Bug #2: Compare BigInt with BigInt literal
+                if (parsedAmount <= 0n) {
+                    setToast({ message: "Amount must be greater than zero.", type: "error" });
+                    return;
                 }
             } catch {
-                 setToast({ message: "Invalid amount. Please enter a valid number.", type: "error" });
-                 return;
+                setToast({ message: "Invalid amount. Please enter a valid number.", type: "error" });
+                return;
             }
 
             await ethereum.request({
@@ -177,7 +181,9 @@ const Transactions = () => {
             }
         };
         init();
-    }, [ethereum, getAllTransactions]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ethereum]);
+    // Fix Bug #3: getAllTransactions intentionally omitted to prevent infinite loop
 
     return (
         <div className="flex w-full justify-center items-center 2xl:px-20 gradient-bg-transactions">
@@ -191,10 +197,10 @@ const Transactions = () => {
                         Send Crypto <br /> across the world
                     </Motion.h1>
                     <Motion.p
-                         initial={{ opacity: 0, x: -20 }}
-                         animate={{ opacity: 1, x: 0 }}
-                         transition={{ delay: 0.1 }}
-                         className="text-left mt-5 text-on-surface-variant font-light md:w-9/12 w-11/12 text-base"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-left mt-5 text-on-surface-variant font-light md:w-9/12 w-11/12 text-base"
                     >
                         Explore the crypto world. Buy and sell cryptocurrencies on Krypto.
                     </Motion.p>
@@ -290,7 +296,7 @@ const Transactions = () => {
                     </div>
                 </div>
             </div>
-             <AnimatePresence>
+            <AnimatePresence>
                 {toast && (
                     <Toast
                         message={toast.message}
