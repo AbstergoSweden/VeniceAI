@@ -21,6 +21,7 @@ const Toast = ({ message, type = 'info', onClose, duration = 3000 }) => {
   const styles = {
     success: 'bg-green-500/80 border-green-400',
     error: 'bg-red-500/80 border-red-400',
+    warning: 'bg-yellow-500/80 border-yellow-400',
     info: 'bg-blue-500/80 border-blue-400'
   };
 

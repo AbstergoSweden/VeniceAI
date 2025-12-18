@@ -78,7 +78,10 @@ if (typeof __firebase_config === 'undefined') {
     throw new Error("Firebase configuration is required but not provided. Please configure firebase in vite.config.js or build process.");
 } else {
     try {
-        firebaseConfig = JSON.parse(__firebase_config);
+        // Handle both string (production build) and object (Vite dev) formats
+        firebaseConfig = typeof __firebase_config === 'string'
+            ? JSON.parse(__firebase_config)
+            : __firebase_config;
     } catch {
         throw new Error("Invalid Firebase configuration format. Please ensure __firebase_config contains valid JSON.");
     }

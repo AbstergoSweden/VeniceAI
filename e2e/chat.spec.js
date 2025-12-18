@@ -29,7 +29,7 @@ test.describe('Chat Panel Functionality', () => {
     // Fill in a message in the chat input
     const messageInput = page.locator('textarea[placeholder="Type a message..."]');
     const testMessage = 'Hello, can you help me create a prompt for a landscape?';
-    
+
     await messageInput.fill(testMessage);
     await messageInput.press('Enter');
 
@@ -44,6 +44,6 @@ test.describe('Chat Panel Functionality', () => {
     await messageInput.press('Enter');
 
     // Check that both user and assistant messages are displayed
-    await expect(page.locator('.max-w-[70%]')).toHaveCount(2); // User + Assistant message
+    await expect(page.locator('.max-w-\\[75\\%\\]')).toHaveCount(2); // User + Assistant message
   });
 });
