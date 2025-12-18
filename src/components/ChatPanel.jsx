@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Wand2 } from 'lucide-react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
+import Skeleton from './Skeleton';
 
 const SYSTEM_PROMPT_KEY = 'venice-system-prompt';
 const DEFAULT_SYSTEM_PROMPT = 'You are a helpful AI assistant.';
@@ -14,14 +16,23 @@ const DEFAULT_SYSTEM_PROMPT = 'You are a helpful AI assistant.';
 const ChatMessage = ({ role, content }) => {
     const isUser = role === 'user';
     return (
-        <div
-            className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-2`}
+        <Motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
             role="listitem"
         >
-            <div className={`max-w-[70%] p-3 rounded-xl ${isUser ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface'} shadow-elevation-1`}>
-                <p className="text-sm leading-relaxed">{content}</p>
-            </div>
-        </div>
+            <Motion.div
+                whileHover={{ scale: 1.01 }}
+                className={`max-w-[75%] p-4 rounded-2xl backdrop-blur-md shadow-lg border border-white/5 ${
+                    isUser
+                        ? 'bg-primary/90 text-on-primary rounded-tr-sm'
+                        : 'bg-surface-container-high/80 text-on-surface rounded-tl-sm'
+                }`}
+            >
+                <p className="text-[15px] leading-7 tracking-wide font-normal">{content}</p>
+            </Motion.div>
+        </Motion.div>
     );
 };
 
@@ -33,9 +44,13 @@ const ChatMessage = ({ role, content }) => {
  * @returns {JSX.Element} The system prompt editor.
  */
 const ChatSystemPrompt = ({ systemPrompt, setSystemPrompt }) => (
-    <div className="p-4 border-b border-outline-variant bg-surface-container-low">
+    <Motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-4 border-b border-white/10 bg-white/5 backdrop-blur-sm"
+    >
         <label
-            className="block text-sm font-medium text-on-surface-variant mb-1"
+            className="block text-xs font-semibold text-on-surface-variant/80 uppercase tracking-wider mb-2"
             htmlFor="system-prompt-input"
         >
             System Prompt
@@ -45,11 +60,11 @@ const ChatSystemPrompt = ({ systemPrompt, setSystemPrompt }) => (
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
             rows={2}
-            className="m3-textfield w-full resize-none"
+            className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none placeholder-white/30"
             placeholder="Enter system instruction for the assistant..."
             aria-label="System prompt for AI assistant"
         />
-    </div>
+    </Motion.div>
 );
 
 /**
@@ -80,7 +95,7 @@ const ChatInput = ({ onSend, disabled }) => {
     return (
         <form
             onSubmit={handleSubmit}
-            className="flex items-center p-4 border-t border-outline-variant bg-surface-container-low"
+            className="flex items-center p-4 border-t border-white/10 bg-white/5 backdrop-blur-lg"
         >
             <textarea
                 value={input}
@@ -88,18 +103,20 @@ const ChatInput = ({ onSend, disabled }) => {
                 onKeyDown={handleKeyDown}
                 rows={1}
                 disabled={disabled}
-                className="m3-textfield flex-1 resize-none mr-2"
-                placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
+                className="flex-1 bg-black/20 border border-white/10 rounded-xl p-3 mr-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none placeholder-white/30"
+                placeholder="Type a message..."
                 aria-label="Chat message input"
             />
-            <button
+            <Motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 type="submit"
                 disabled={disabled || !input.trim()}
                 aria-label="Send message"
-                className="m3-button-filled flex items-center justify-center p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary hover:bg-primary/90 text-white p-3 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-                <Send className="w-4 h-4" />
-            </button>
+                <Send className="w-5 h-5" />
+            </Motion.button>
         </form>
     );
 };
@@ -153,7 +170,7 @@ const ChatPanel = ({
     // Auto-scroll to bottom when chat history changes
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [chatHistory]);
+    }, [chatHistory, loading]);
 
     const handleSend = async (userMessage) => {
         if (!userMessage.trim()) return;
@@ -210,29 +227,48 @@ const ChatPanel = ({
     };
 
     return (
-        <div className="m3-surface flex flex-col h-full">
+        <div className="relative flex flex-col h-full bg-surface/50 backdrop-blur-xl rounded-xl overflow-hidden shadow-2xl border border-white/5">
             <ChatSystemPrompt systemPrompt={systemPrompt} setSystemPrompt={setSystemPrompt} />
             <div
                 ref={messagesContainerRef}
-                className="flex-1 overflow-y-auto p-4 space-y-2"
+                className="flex-1 overflow-y-auto p-6 space-y-4 scroll-smooth"
                 role="log"
                 aria-live="polite"
                 aria-label="Chat conversation"
                 aria-atomic="false"
             >
-                {chatHistory.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-on-surface-variant text-sm">
-                        <p>Start a conversation by typing a message below.</p>
-                    </div>
-                ) : (
-                    chatHistory.map((msg, idx) => (
-                        <ChatMessage key={idx} role={msg.role} content={msg.content} />
-                    ))
-                )}
+                <AnimatePresence>
+                    {chatHistory.length === 0 ? (
+                        <Motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex flex-col items-center justify-center h-full text-on-surface-variant/70 text-sm space-y-4"
+                        >
+                            <Wand2 className="w-12 h-12 opacity-20" />
+                            <p>Start a conversation by typing a message below.</p>
+                        </Motion.div>
+                    ) : (
+                        chatHistory.map((msg, idx) => (
+                            <ChatMessage key={idx} role={msg.role} content={msg.content} />
+                        ))
+                    )}
+                </AnimatePresence>
+
                 {loading && (
-                    <div className="flex justify-center p-2">
-                        <Wand2 className="animate-spin text-primary" aria-label="Loading response" />
-                    </div>
+                    <Motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="flex justify-start mb-4"
+                    >
+                        <div className="bg-surface-container-high/50 p-4 rounded-2xl rounded-tl-sm backdrop-blur-sm border border-white/5">
+                           <div className="flex space-x-2">
+                                <Skeleton className="w-2 h-2 rounded-full bg-primary/40" />
+                                <Skeleton className="w-2 h-2 rounded-full bg-primary/40 delay-75" />
+                                <Skeleton className="w-2 h-2 rounded-full bg-primary/40 delay-150" />
+                           </div>
+                        </div>
+                    </Motion.div>
                 )}
                 <div ref={messagesEndRef} />
             </div>

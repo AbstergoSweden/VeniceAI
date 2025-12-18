@@ -64,7 +64,7 @@ describe('ChatPanel Component', () => {
 
     it('renders correctly', () => {
         render(<ChatPanel {...defaultProps} />);
-        expect(screen.getByPlaceholderText('Type a message... (Enter to send, Shift+Enter for new line)')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Type a message...')).toBeInTheDocument();
         expect(screen.getByText('System Prompt')).toBeInTheDocument();
     });
 
@@ -79,7 +79,7 @@ describe('ChatPanel Component', () => {
         mockCallVeniceChat.mockResolvedValue('Response from AI');
         render(<ChatPanel {...defaultProps} />);
 
-        const input = screen.getByPlaceholderText('Type a message... (Enter to send, Shift+Enter for new line)');
+        const input = screen.getByPlaceholderText('Type a message...');
         fireEvent.change(input, { target: { value: 'Hello' } });
 
         const sendButton = screen.getByLabelText('Send message');
@@ -97,7 +97,7 @@ describe('ChatPanel Component', () => {
         mockCallVeniceChat.mockRejectedValue(new Error('API Error'));
         render(<ChatPanel {...defaultProps} />);
 
-        const input = screen.getByPlaceholderText('Type a message... (Enter to send, Shift+Enter for new line)');
+        const input = screen.getByPlaceholderText('Type a message...');
         fireEvent.change(input, { target: { value: 'Hello' } });
 
         const sendButton = screen.getByLabelText('Send message');
@@ -124,7 +124,7 @@ describe('ChatPanel Component', () => {
     it('handles shift+enter for multiline input', async () => {
         render(<ChatPanel {...defaultProps} />);
 
-        const input = screen.getByPlaceholderText('Type a message... (Enter to send, Shift+Enter for new line)');
+        const input = screen.getByPlaceholderText('Type a message...');
         
         // Simulate pressing Shift+Enter to create a new line instead of submitting
         fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
@@ -174,7 +174,7 @@ describe('ChatPanel Component', () => {
 
         render(<ChatPanel {...defaultProps} />);
 
-        const input = screen.getByPlaceholderText('Type a message... (Enter to send, Shift+Enter for new line)');
+        const input = screen.getByPlaceholderText('Type a message...');
         fireEvent.change(input, { target: { value: 'Hello' } });
 
         const sendButton = screen.getByLabelText('Send message');
@@ -188,7 +188,7 @@ describe('ChatPanel Component', () => {
         mockCallVeniceChat.mockResolvedValue('Response from AI');
         render(<ChatPanel {...defaultProps} />);
 
-        const input = screen.getByPlaceholderText('Type a message... (Enter to send, Shift+Enter for new line)');
+        const input = screen.getByPlaceholderText('Type a message...');
         fireEvent.change(input, { target: { value: 'Hello' } });
         expect(input.value).toBe('Hello');
 
@@ -203,7 +203,7 @@ describe('ChatPanel Component', () => {
     it('does not send empty messages', async () => {
         render(<ChatPanel {...defaultProps} />);
 
-        const input = screen.getByPlaceholderText('Type a message... (Enter to send, Shift+Enter for new line)');
+        const input = screen.getByPlaceholderText('Type a message...');
         fireEvent.change(input, { target: { value: '   ' } }); // Just spaces
 
         const sendButton = screen.getByLabelText('Send message');
@@ -217,7 +217,7 @@ describe('ChatPanel Component', () => {
         mockCallVeniceChat.mockResolvedValue('Response');
         render(<ChatPanel {...defaultProps} />);
 
-        const input = screen.getByPlaceholderText('Type a message... (Enter to send, Shift+Enter for new line)');
+        const input = screen.getByPlaceholderText('Type a message...');
         fireEvent.change(input, { target: { value: '  Hello world  ' } }); // Spaces
 
         const sendButton = screen.getByLabelText('Send message');
@@ -235,7 +235,7 @@ describe('ChatPanel Component', () => {
         
         render(<ChatPanel {...limitedProps} />);
 
-        const input = screen.getByPlaceholderText('Type a message... (Enter to send, Shift+Enter for new line)');
+        const input = screen.getByPlaceholderText('Type a message...');
 
         // Send 5 messages to exceed the memory limit of 2
         for (let i = 1; i <= 5; i++) {
