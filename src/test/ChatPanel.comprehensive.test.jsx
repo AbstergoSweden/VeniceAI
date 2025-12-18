@@ -1,40 +1,39 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import ChatPanel from '../components/ChatPanel';
+import ChatPanel from '../features/chat/components/ChatPanel';
 
 // Mock the refs used in the component
 const mockScrollIntoView = vi.fn();
 
 // Mock the localStorage
 const localStorageMock = (() => {
-  let store = {};
-  return {
-    getItem: vi.fn((key) => store[key] || null),
-    setItem: vi.fn((key, value) => {
-      store[key] = value.toString();
-    }),
-    removeItem: vi.fn((key) => {
-      delete store[key];
-    }),
-    clear: vi.fn(() => {
-      store = {};
-    }),
-    get length() {
-      return Object.keys(store).length;
-    },
-    key: vi.fn((i) => Object.keys(store)[i] || null),
-  };
+    let store = {};
+    return {
+        getItem: vi.fn((key) => store[key] || null),
+        setItem: vi.fn((key, value) => {
+            store[key] = value.toString();
+        }),
+        removeItem: vi.fn((key) => {
+            delete store[key];
+        }),
+        clear: vi.fn(() => {
+            store = {};
+        }),
+        get length() {
+            return Object.keys(store).length;
+        },
+        key: vi.fn((i) => Object.keys(store)[i] || null),
+    };
 })();
 
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
+    value: localStorageMock,
 });
 
 // Mock the window.scrollTo to prevent errors
 Object.defineProperty(window, 'scrollTo', {
-  value: vi.fn(),
-  writable: true,
+    value: vi.fn(),
+    writable: true,
 });
 
 // Mock the element.scrollIntoView method
@@ -125,10 +124,10 @@ describe('ChatPanel Component', () => {
         render(<ChatPanel {...defaultProps} />);
 
         const input = screen.getByPlaceholderText('Type a message...');
-        
+
         // Simulate pressing Shift+Enter to create a new line instead of submitting
         fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
-        
+
         // Input should not have triggered the API call
         expect(mockCallVeniceChat).not.toHaveBeenCalled();
     });
@@ -138,10 +137,10 @@ describe('ChatPanel Component', () => {
         localStorageMock.getItem.mockReturnValue(savedPrompt);
 
         const { rerender } = render(<ChatPanel {...defaultProps} />);
-        
+
         // Re-render to trigger useEffect
         rerender(<ChatPanel {...defaultProps} />);
-        
+
         expect(mockSetSystemPrompt).toHaveBeenCalledWith(savedPrompt);
     });
 
@@ -159,9 +158,9 @@ describe('ChatPanel Component', () => {
 
     it('uses default system prompt if none exists', () => {
         localStorageMock.getItem.mockReturnValue(null);
-        
+
         render(<ChatPanel {...defaultProps} />);
-        
+
         // Should call with the default prompt after mounting
         // We need to wait for the useEffect to run
         expect(mockSetSystemPrompt).toHaveBeenCalled();
@@ -232,7 +231,7 @@ describe('ChatPanel Component', () => {
     it('respects memory limit by keeping only recent messages', async () => {
         mockCallVeniceChat.mockResolvedValue('Response from AI');
         const limitedProps = { ...defaultProps, memoryLimit: 2 };
-        
+
         render(<ChatPanel {...limitedProps} />);
 
         const input = screen.getByPlaceholderText('Type a message...');
@@ -241,23 +240,23 @@ describe('ChatPanel Component', () => {
         for (let i = 1; i <= 5; i++) {
             fireEvent.change(input, { target: { value: `Message ${i}` } });
             fireEvent.click(screen.getByLabelText('Send message'));
-            
+
             // Wait for the message to be processed
             await waitFor(() => {
                 expect(mockCallVeniceChat).toHaveBeenCalledTimes(i);
             });
-            
+
             // Clear the input for the next message
             fireEvent.change(input, { target: { value: '' } });
         }
 
         // At this point, only the last 2 exchanges (4 messages) should be kept
         expect(mockSetChatHistory).toHaveBeenCalled();
-        
+
         // Call history should be limited based on the memory limit
         const lastCall = mockSetChatHistory.mock.calls[mockSetChatHistory.mock.calls.length - 1][0];
         const historyAfterCall = lastCall([]); // Apply the updater function to empty array
-        
+
         // Should have at most 4 items (2 exchanges) with memory limit of 2
         expect(historyAfterCall.length).toBeLessThanOrEqual(4);
     });

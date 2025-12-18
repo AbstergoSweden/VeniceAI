@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render } from '@testing-library/react';
 import App from '../App';
 
 // Mock all dependencies
@@ -35,10 +35,10 @@ vi.mock('firebase/firestore', () => ({
 }));
 
 vi.mock('../utils/api', () => ({
-  apiCall: vi.fn((url, data, config) => {
+  apiCall: vi.fn((url, data) => {
     // Simulate API response with different seeds to verify they're preserved
-    return Promise.resolve({ 
-      images: [`data:image/png;base64,${btoa(`simulated-image-${data.seed}`)}`] 
+    return Promise.resolve({
+      images: [`data:image/png;base64,${btoa(`simulated-image-${data.seed}`)}`]
     });
   }),
 }));
@@ -80,22 +80,22 @@ describe('Image Generation Race Condition Fix', () => {
       .mockResolvedValueOnce({ images: ['image-data-3'] }) // This would be for seed+2
       .mockResolvedValueOnce({ images: ['image-data-1'] }) // This would be for seed+0  
       .mockResolvedValueOnce({ images: ['image-data-2'] }); // This would be for seed+1
-    
+
     // Temporarily replace the apiCall in the module
     vi.doMock('../utils/api', () => ({
       apiCall: mockApiCall
     }));
-    
-    const { rerender } = render(<App />);
-    
+
+    render(<App />);
+
     // We can't directly test the internal state without access to the component instance
     // But we can validate the implementation by checking that the fix correctly uses indexes
     // and preserves the right parameters with each result
-    
+
     // The main validation is that our fix properly correlates requests with responses
     // by including the request parameters in the promise processing
     expect(true).toBe(true); // Placeholder - the real fix is in the implementation
-    
+
     // Restore the default mock
     vi.doUnmock('../utils/api');
   });
@@ -104,40 +104,40 @@ describe('Image Generation Race Condition Fix', () => {
     // Test that each generated image has the correct seed associated with it
     const mockApiCall = vi.fn((url, data) => {
       // Return a response that includes the seed from the request, so we can verify it later
-      return Promise.resolve({ 
-        images: [`simulated-image-with-seed-${data.seed}`] 
+      return Promise.resolve({
+        images: [`simulated-image-with-seed-${data.seed}`]
       });
     });
-    
+
     vi.doMock('../utils/api', () => ({
       apiCall: mockApiCall
     }));
-    
+
     render(<App />);
-    
+
     // Verify that our new implementation correctly preserves the seed in the result
     expect(true).toBe(true); // Actual verification happens in the implementation
-    
+
     vi.doUnmock('../utils/api');
   });
-  
+
   it('handles mixed success and failure scenarios without losing parameter association', async () => {
     // Mock API call with mix of success and failures
     const mockApiCall = vi.fn()
       .mockResolvedValueOnce({ images: ['image-data-1'] })  // Success
       .mockRejectedValueOnce(new Error('API Error'))        // Failure
       .mockResolvedValueOnce({ images: ['image-data-3'] }); // Success
-    
+
     vi.doMock('../utils/api', () => ({
       apiCall: mockApiCall
     }));
-    
+
     render(<App />);
-    
+
     // The implementation should correctly handle both successful and failed requests
     // while maintaining proper association of parameters with results
     expect(true).toBe(true); // Verification in implementation
-    
+
     vi.doUnmock('../utils/api');
   });
 });

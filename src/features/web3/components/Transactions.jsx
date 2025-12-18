@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { BrowserProvider, Contract, formatEther, parseEther, isAddress } from "ethers";
-import { contractABI, contractAddress, shortenAddress } from "../utils/constants";
+import { contractABI, contractAddress, shortenAddress } from "../../../utils/constants";
 import { Loader2 } from "lucide-react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
-import Toast from "./Toast";
+import Toast from "../../../components/ui/Toast";
 
 /**
  * Transactions component for interacting with the Ethereum blockchain.
@@ -174,10 +174,10 @@ const Transactions = () => {
                     setCurrentAccount(accounts[0]);
                     getAllTransactions();
                 } else {
-                    console.log("No accounts found");
+                    console.error('Wallet connection failed: No accounts found');
                 }
             } catch (error) {
-                console.log(error);
+                console.error('Wallet connection error:', error);
             }
         };
         init();

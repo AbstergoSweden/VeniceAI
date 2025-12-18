@@ -16,7 +16,9 @@ export const apiCall = async (url, data, config, initialKeyIndex = 0, isBinary =
     if (url.includes('/image/generate') && data) {
         const cachedImage = imageCache.getCached(data);
         if (cachedImage) {
-            console.log('Returning cached image for prompt:', data.prompt.substring(0, 30) + '...');
+            if (import.meta.env.DEV) {
+                console.log('Returning cached image for prompt:', data.prompt.substring(0, 30) + '...');
+            }
             return { images: [cachedImage] }; // Return in same format as API
         }
     }

@@ -168,14 +168,18 @@ export const syncVeniceModels = async (apiKey, baseUrl = 'https://api.venice.ai/
     if (!forceRefresh) {
         const cached = getCachedModels();
         if (cached && cached.length > 0) {
-            console.log(`[ModelSync] Using cached models (${cached.length} models)`);
+            if (import.meta.env.DEV) {
+                console.log(`[ModelSync] Using cached models (${cached.length} models)`);
+            }
             return cached;
         }
     }
 
     // No valid cache, fetch from API
     try {
-        console.log('[ModelSync] Fetching models from Venice.ai API...');
+        if (import.meta.env.DEV) {
+            console.log('[ModelSync] Fetching models from Venice.ai API...');
+        }
         const models = await fetchModelsFromAPI(apiKey, baseUrl);
 
         if (models.length === 0) {
@@ -183,7 +187,9 @@ export const syncVeniceModels = async (apiKey, baseUrl = 'https://api.venice.ai/
             return DEFAULT_CHAT_MODELS;
         }
 
-        console.log(`[ModelSync] Successfully fetched ${models.length} models`);
+        if (import.meta.env.DEV) {
+            console.log(`[ModelSync] Successfully fetched ${models.length} models`);
+        }
 
         // Cache the results
         cacheModels(models);

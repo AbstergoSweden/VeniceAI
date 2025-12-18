@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Wand2 } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
-import Skeleton from './Skeleton';
+import Skeleton from '../../../components/ui/Skeleton';
 
 const SYSTEM_PROMPT_KEY = 'venice-system-prompt';
 const DEFAULT_SYSTEM_PROMPT = 'You are a helpful AI assistant.';
@@ -25,8 +25,8 @@ const ChatMessage = ({ role, content }) => {
             <Motion.div
                 whileHover={{ scale: 1.01 }}
                 className={`max-w-[75%] p-4 rounded-2xl backdrop-blur-md shadow-lg border border-white/5 ${isUser
-                        ? 'bg-primary/90 text-on-primary rounded-tr-sm'
-                        : 'bg-surface-container-high/80 text-on-surface rounded-tl-sm'
+                    ? 'bg-primary/90 text-on-primary rounded-tr-sm'
+                    : 'bg-surface-container-high/80 text-on-surface rounded-tl-sm'
                     }`}
             >
                 <p className="text-[15px] leading-7 tracking-wide font-normal">{content}</p>
@@ -248,9 +248,13 @@ const ChatPanel = ({
                             <p>Start a conversation by typing a message below.</p>
                         </Motion.div>
                     ) : (
-                        chatHistory.map((msg, idx) => (
-                            <ChatMessage key={idx} role={msg.role} content={msg.content} />
-                        ))
+                        chatHistory.map((msg, idx) => {
+                            // Use composite key for stability: index + role + content hash
+                            // This prevents React reconciliation issues when messages update
+                            const contentHash = msg.content.substring(0, 20).replace(/\s/g, '_');
+                            const stableKey = `${idx}-${msg.role}-${contentHash}`;
+                            return <ChatMessage key={stableKey} role={msg.role} content={msg.content} />;
+                        })
                     )}
                 </AnimatePresence>
 
