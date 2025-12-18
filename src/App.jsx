@@ -6,6 +6,7 @@ import { Sparkles, Trash2, Download, Wand2, Image as ImageIcon, Loader2, Refresh
 import { apiCall } from './utils/api';
 import { compressImage } from './utils/image';
 import imageCache from './utils/cache';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 // Lazy load heavy components
 const ChatPanel = lazy(() => import('./components/ChatPanel'));
@@ -911,9 +912,20 @@ export default function App() {
             </div>
 
             {/* Enhancement Modal */}
+            <AnimatePresence>
             {enhanceModalOpen && (
-                <div className="m3-dialog-scrim fixed inset-0 flex items-center justify-center z-50 p-4 animate-fade-in">
-                    <div className="m3-dialog w-full max-w-md overflow-hidden animate-scale-in">
+                <Motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="m3-dialog-scrim fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/50 backdrop-blur-sm"
+                >
+                    <Motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        className="m3-dialog w-full max-w-md overflow-hidden bg-surface-container rounded-2xl shadow-2xl border border-white/10"
+                    >
                         <div className="p-6 border-b border-outline-variant flex justify-between items-center">
                             <h3 className="text-xl font-bold text-on-surface flex items-center gap-2"><Wand2 className="text-tertiary" /> Enhance Image</h3>
                             <button onClick={() => setEnhanceModalOpen(false)} className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest" aria-label="Close enhancement modal"><X className="w-5 h-5" /></button>
@@ -955,14 +967,26 @@ export default function App() {
                             <button onClick={() => setEnhanceModalOpen(false)} className="m3-button-outlined px-4 py-2 text-sm">Cancel</button>
                             <button onClick={handleEnhanceSubmit} className="m3-button-filled px-4 py-2 text-sm !bg-tertiary !text-on-tertiary">Apply Enhancement</button>
                         </div>
-                    </div>
-                </div>
+                    </Motion.div>
+                </Motion.div>
             )}
+            </AnimatePresence>
 
             {/* Image Description Modal */}
+            <AnimatePresence>
             {describeModalOpen && (
-                <div className="m3-dialog-scrim fixed inset-0 flex items-center justify-center z-50 p-4 animate-fade-in">
-                    <div className="m3-dialog w-full max-w-lg overflow-hidden animate-scale-in">
+                <Motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="m3-dialog-scrim fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/50 backdrop-blur-sm"
+                >
+                    <Motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        className="m3-dialog w-full max-w-lg overflow-hidden bg-surface-container rounded-2xl shadow-2xl border border-white/10"
+                    >
                         <div className="p-6 border-b border-outline-variant flex justify-between items-center">
                             <h3 className="text-xl font-bold text-on-surface flex items-center gap-2">
                                 <ImageIcon className="text-tertiary" /> Describe Image
@@ -1054,13 +1078,19 @@ export default function App() {
                                 </div>
                             )}
                         </div>
-                    </div>
-                </div>
+                    </Motion.div>
+                </Motion.div>
             )}
+            </AnimatePresence>
 
             {/* Toast Notification */}
+            <AnimatePresence>
             {toast.show && (
-                <div className={`fixed bottom-4 right-4 z-50 p-4 rounded-2xl shadow-elevation-4 border backdrop-blur-sm animate-slide-up max-w-md ${toast.type === 'success' ? 'bg-success-container/95 border-success/30 text-on-success-container' :
+                <Motion.div
+                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                    className={`fixed bottom-4 right-4 z-50 p-4 rounded-2xl shadow-elevation-4 border backdrop-blur-sm max-w-md ${toast.type === 'success' ? 'bg-success-container/95 border-success/30 text-on-success-container' :
                     toast.type === 'warning' ? 'bg-warning-container/95 border-warning/30 text-on-warning-container' :
                         toast.type === 'error' ? 'bg-error-container/95 border-error/30 text-on-error-container' :
                             'bg-info-container/95 border-info/30 text-on-info-container'
@@ -1081,8 +1111,9 @@ export default function App() {
                             <X className="w-4 h-4" />
                         </button>
                     </div>
-                </div>
+                </Motion.div>
             )}
+            </AnimatePresence>
         </div>
     );
 }

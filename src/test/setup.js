@@ -22,6 +22,9 @@ HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
 }));
 HTMLCanvasElement.prototype.toDataURL = vi.fn(() => "data:image/jpeg;base64,mockCompressedImage");
 
+// Mock scrollIntoView
+Element.prototype.scrollIntoView = vi.fn();
+
 // Mock localStorage
 const localStorageMock = (() => {
     let store = {};

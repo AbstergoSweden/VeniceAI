@@ -37,7 +37,7 @@ describe('ChatPanel Component', () => {
         const input = screen.getByPlaceholderText('Type a message...');
         fireEvent.change(input, { target: { value: 'Hello' } });
 
-        const sendButton = screen.getByLabelText('Send');
+        const sendButton = screen.getByLabelText('Send message');
         fireEvent.click(sendButton);
 
         await waitFor(() => {
@@ -56,7 +56,7 @@ describe('ChatPanel Component', () => {
         const input = screen.getByPlaceholderText('Type a message...');
         fireEvent.change(input, { target: { value: 'Hello' } });
 
-        const sendButton = screen.getByLabelText('Send');
+        const sendButton = screen.getByLabelText('Send message');
         fireEvent.click(sendButton);
 
         await waitFor(() => {
