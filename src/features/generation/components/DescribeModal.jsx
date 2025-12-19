@@ -23,30 +23,34 @@ const DescribeModal = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="m3-dialog-scrim fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/50 backdrop-blur-sm"
+                    className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/60 backdrop-blur-md"
                 >
                     <Motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.9, opacity: 0 }}
-                        className="m3-dialog w-full max-w-lg overflow-hidden bg-surface-container rounded-2xl shadow-2xl border border-white/10"
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        className="w-full max-w-lg overflow-hidden bg-surface-container rounded-2xl shadow-2xl border border-white/10"
                     >
-                        <div className="p-6 border-b border-outline-variant flex justify-between items-center">
-                            <h3 className="text-xl font-bold text-on-surface flex items-center gap-2">
-                                <ImageIcon className="text-tertiary" /> Describe Image
+                        <div className="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
+                            <h3 className="text-lg font-bold text-on-surface flex items-center gap-2">
+                                <ImageIcon className="w-5 h-5 text-tertiary" /> Describe Image
                             </h3>
-                            <button onClick={onClose}
-                                className="text-on-surface-variant hover:text-on-surface transition p-1 rounded-full hover:bg-surface-container-highest"
+                            <button
+                                onClick={onClose}
+                                className="text-on-surface-variant/70 hover:text-on-surface transition p-1 rounded-full hover:bg-white/10"
                                 aria-label="Close image description modal"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-4">
+                        <div className="p-6 space-y-6 bg-surface/80 backdrop-blur-xl">
                             {/* Upload Area */}
                             {!uploadedImage ? (
-                                <div className="border-2 border-dashed border-outline-variant rounded-2xl p-10 text-center hover:border-primary transition-colors cursor-pointer group">
+                                <Motion.div
+                                    whileHover={{ scale: 1.01, borderColor: "rgba(var(--primary-rgb), 0.5)" }}
+                                    className="border-2 border-dashed border-white/20 rounded-2xl p-10 text-center transition-colors cursor-pointer group bg-black/20"
+                                >
                                     <input
                                         type="file"
                                         id="image-upload"
@@ -54,67 +58,77 @@ const DescribeModal = ({
                                         onChange={onImageUpload}
                                         className="hidden"
                                     />
-                                    <label htmlFor="image-upload" className="cursor-pointer">
-                                        <ImageIcon className="w-14 h-14 mx-auto mb-3 text-on-surface-variant opacity-50 group-hover:text-primary group-hover:opacity-80 transition" />
-                                        <p className="text-sm text-on-surface-variant mb-1">Click to upload an image</p>
-                                        <p className="text-xs text-on-surface-variant opacity-60">PNG, JPG, WEBP up to 10MB</p>
+                                    <label htmlFor="image-upload" className="cursor-pointer block w-full h-full">
+                                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-container-high/50 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                            <ImageIcon className="w-8 h-8 text-on-surface-variant/50 group-hover:text-primary transition-colors" />
+                                        </div>
+                                        <p className="text-sm font-medium text-on-surface mb-1">Click to upload an image</p>
+                                        <p className="text-xs text-on-surface-variant/60">PNG, JPG, WEBP up to 10MB</p>
                                     </label>
-                                </div>
+                                </Motion.div>
                             ) : (
                                 <div className="space-y-4">
-                                    <div className="relative">
+                                    <div className="relative group">
                                         <img
                                             src={`data:image/jpeg;base64,${uploadedImage}`}
                                             alt="Uploaded"
-                                            className="w-full h-48 object-contain rounded-xl bg-surface-container border border-outline-variant"
+                                            className="w-full h-56 object-contain rounded-xl bg-black/40 border border-white/10"
                                         />
-                                        <button
+                                        <Motion.button
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
                                             onClick={onRemoveImage}
-                                            className="absolute top-2 right-2 p-1.5 bg-error hover:bg-error/80 text-on-error rounded-full transition shadow-elevation-2"
+                                            className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-error/80 text-white rounded-full transition shadow-lg border border-white/10"
                                             aria-label="Remove uploaded image"
                                         >
                                             <X className="w-4 h-4" />
-                                        </button>
+                                        </Motion.button>
                                     </div>
 
                                     {!imageDescription && (
-                                        <button
+                                        <Motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
                                             onClick={onDescribe}
                                             disabled={describingImage}
-                                            className={`m3-button-filled w-full py-3 font-medium flex items-center justify-center gap-2 ${describingImage
-                                                ? '!bg-surface-container-high !text-on-surface-variant cursor-not-allowed'
-                                                : '!bg-tertiary !text-on-tertiary'
-                                                }`}
+                                            className={`w-full py-3.5 rounded-xl font-bold text-white shadow-lg transition-all duration-300 flex justify-center items-center gap-2 ${describingImage
+                                                ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-tertiary to-secondary shadow-tertiary/25'
+                                            }`}
                                         >
                                             {describingImage ? (
                                                 <><Loader2 className="w-4 h-4 animate-spin" /> Analyzing Image...</>
                                             ) : (
                                                 <><Wand2 className="w-4 h-4" /> Describe Image</>
                                             )}
-                                        </button>
+                                        </Motion.button>
                                     )}
 
                                     {imageDescription && (
-                                        <div className="space-y-3">
-                                            <div className="bg-surface-container rounded-xl p-4 border border-outline-variant">
+                                        <Motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="space-y-4"
+                                        >
+                                            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                                                 <p className="text-sm text-on-surface leading-relaxed">{imageDescription}</p>
                                             </div>
                                             <div className="flex gap-3">
                                                 <button
                                                     onClick={onDescribe}
                                                     disabled={describingImage}
-                                                    className="m3-button-outlined flex-1 py-2.5 text-sm"
+                                                    className="flex-1 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors"
                                                 >
                                                     Re-analyze
                                                 </button>
                                                 <button
                                                     onClick={onUseDescription}
-                                                    className="m3-button-filled flex-1 py-2.5 text-sm !bg-primary !text-on-primary"
+                                                    className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-sm font-bold shadow-lg transition-colors"
                                                 >
                                                     Use as Prompt
                                                 </button>
                                             </div>
-                                        </div>
+                                        </Motion.div>
                                     )}
                                 </div>
                             )}
