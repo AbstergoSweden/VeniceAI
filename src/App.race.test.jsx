@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
-import App from '../App';
+import App from './App';
 
 // Mock all dependencies
 vi.mock('firebase/app', () => ({
@@ -34,7 +34,7 @@ vi.mock('firebase/firestore', () => ({
   getDocs: vi.fn(() => Promise.resolve({ docs: [] }))
 }));
 
-vi.mock('../utils/api', () => ({
+vi.mock('./utils/api', () => ({
   apiCall: vi.fn((url, data) => {
     // Simulate API response with different seeds to verify they're preserved
     return Promise.resolve({
@@ -43,11 +43,11 @@ vi.mock('../utils/api', () => ({
   }),
 }));
 
-vi.mock('../utils/image', () => ({
+vi.mock('./utils/image', () => ({
   compressImage: vi.fn((img) => Promise.resolve(img)),
 }));
 
-vi.mock('../utils/cache', () => ({
+vi.mock('./utils/cache', () => ({
   default: {
     getCached: vi.fn(),
     set: vi.fn(),
@@ -82,7 +82,7 @@ describe('Image Generation Race Condition Fix', () => {
       .mockResolvedValueOnce({ images: ['image-data-2'] }); // This would be for seed+1
 
     // Temporarily replace the apiCall in the module
-    vi.doMock('../utils/api', () => ({
+    vi.doMock('./utils/api', () => ({
       apiCall: mockApiCall
     }));
 
@@ -97,7 +97,7 @@ describe('Image Generation Race Condition Fix', () => {
     expect(true).toBe(true); // Placeholder - the real fix is in the implementation
 
     // Restore the default mock
-    vi.doUnmock('../utils/api');
+    vi.doUnmock('./utils/api');
   });
 
   it('maintains correct seed values even with concurrent requests', async () => {
@@ -109,7 +109,7 @@ describe('Image Generation Race Condition Fix', () => {
       });
     });
 
-    vi.doMock('../utils/api', () => ({
+    vi.doMock('./utils/api', () => ({
       apiCall: mockApiCall
     }));
 
@@ -118,7 +118,7 @@ describe('Image Generation Race Condition Fix', () => {
     // Verify that our new implementation correctly preserves the seed in the result
     expect(true).toBe(true); // Actual verification happens in the implementation
 
-    vi.doUnmock('../utils/api');
+    vi.doUnmock('./utils/api');
   });
 
   it('handles mixed success and failure scenarios without losing parameter association', async () => {
@@ -128,7 +128,7 @@ describe('Image Generation Race Condition Fix', () => {
       .mockRejectedValueOnce(new Error('API Error'))        // Failure
       .mockResolvedValueOnce({ images: ['image-data-3'] }); // Success
 
-    vi.doMock('../utils/api', () => ({
+    vi.doMock('./utils/api', () => ({
       apiCall: mockApiCall
     }));
 
@@ -138,6 +138,6 @@ describe('Image Generation Race Condition Fix', () => {
     // while maintaining proper association of parameters with results
     expect(true).toBe(true); // Verification in implementation
 
-    vi.doUnmock('../utils/api');
+    vi.doUnmock('./utils/api');
   });
 });

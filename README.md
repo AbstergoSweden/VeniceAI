@@ -61,17 +61,11 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 
 ## Project Tree
 
-```
 .
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── README.md
 ├── SECURITY.md
-├── docs
-│   ├── API_DOCUMENTATION.md
-│   ├── HOW_TO_USE.md
-│   ├── LEGAL.md
-│   └── OPENAI_COMPATIBLE_USAGE.md
 ├── e2e
 │   ├── chat.spec.js
 │   ├── main-page.spec.js
@@ -89,17 +83,17 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 │   └── vite.svg
 ├── src
 │   ├── App.jsx
+│   ├── App.test.jsx
+│   ├── setupTests.js
 │   ├── assets
 │   ├── components
 │   │   ├── ChatPanel.jsx
-│   │   └── Transactions.jsx
+│   │   ├── ChatPanel.test.jsx
+│   │   ├── Transactions.jsx
+│   │   └── Transactions.test.jsx
+│   │   └── ErrorBoundary.jsx
 │   ├── index.css
 │   ├── main.jsx
-│   ├── test
-│   │   ├── Bugs.test.jsx  # Regression tests for fixed bugs
-│   │   ├── ChatPanel.test.jsx
-│   │   ├── Transactions.test.jsx
-│   │   └── setup.js
 │   └── utils
 │       ├── api.js
 │       ├── api.test.js
@@ -109,7 +103,6 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 ├── tailwind.config.js
 ├── vite.config.js
 └── vitest.config.js
-```
 
 ---
 
@@ -134,10 +127,10 @@ The application uses environment variables for configuration. Create a `.env` fi
 
 The following constants are defined in `src/App.jsx` and `src/utils/constants.js`:
 
-*   **`CONFIG.BASE_API_URL`**: `https://api.venice.ai/api/v1` - Base URL for Venice.ai API.
-*   **`CONFIG.DEFAULT_NEGATIVE_PROMPT`**: A default string of negative prompts to improve image quality.
-*   **`CONFIG.COLLECTION_NAME`**: `generatedImages` - Firestore collection name for storing history.
-*   **`VENICE_CHAT_MODELS`**: List of available chat models and their capabilities (vision, reasoning).
+- **`CONFIG.BASE_API_URL`**: `https://api.venice.ai/api/v1` - Base URL for Venice.ai API.
+- **`CONFIG.DEFAULT_NEGATIVE_PROMPT`**: A default string of negative prompts to improve image quality.
+- **`CONFIG.COLLECTION_NAME`**: `generatedImages` - Firestore collection name for storing history.
+- **`VENICE_CHAT_MODELS`**: List of available chat models and their capabilities (vision, reasoning).
 
 ---
 
@@ -183,13 +176,13 @@ This will install all required packages including:
 
 The app uses Venice.ai API keys configured via environment variables.
 
-1.  Copy `.env.example` to `.env`:
+1. Copy `.env.example` to `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-2.  Update `VITE_VENICE_API_KEYS` with your keys.
+2. Update `VITE_VENICE_API_KEYS` with your keys.
 
 ```env
 VITE_VENICE_API_KEYS=your-primary-key,your-backup-key-1
@@ -201,10 +194,10 @@ VITE_VENICE_API_KEYS=your-primary-key,your-backup-key-1
 
 For cloud-synced history:
 
-1.  Create a project at [console.firebase.google.com](https://console.firebase.google.com).
-2.  Enable **Anonymous Authentication**.
-3.  Create a **Firestore Database**.
-4.  Add your Firebase configuration to the `.env` file.
+1. Create a project at [console.firebase.google.com](https://console.firebase.google.com).
+2. Enable **Anonymous Authentication**.
+3. Create a **Firestore Database**.
+4. Add your Firebase configuration to the `.env` file.
 
 > **Note**: Without Firebase, the app runs in offline mode with local-only history.
 
@@ -287,9 +280,9 @@ npx vitest --coverage
 ### Test Files
 
 - `src/utils/api.test.js` - API utility tests
-- `src/test/ChatPanel.test.jsx` - Chat component tests
-- `src/test/Transactions.test.jsx` - Transactions component tests
-- `src/test/Bugs.test.jsx` - Regression tests for reported bugs
+- `src/features/chat/components/ChatPanel.test.jsx` - Chat component tests
+- `src/features/web3/components/Transactions.test.jsx` - Transactions component tests
+- `src/App.test.jsx` - Main application tests
 
 ---
 
@@ -412,9 +405,20 @@ This project follows JSDoc-style documentation standards for JavaScript/JSX code
 ```
 src/
 ├── App.jsx                 # Main application component
-├── components/             # Reusable UI components
-│   ├── ChatPanel.jsx       # Integrated chat interface
-│   ├── Transactions.jsx    # Web3 transaction interface
+├── App.test.jsx            # App component tests
+├── setupTests.js           # Test environment setup
+├── features/               # Feature-based organization
+│   ├── chat/
+│   │   └── components/
+│   │       ├── ChatPanel.jsx       # Integrated chat interface
+│   │       └── ChatPanel.test.jsx  # Chat component tests
+│   ├── generation/
+│   │   └── components/     # Image generation components
+│   └── web3/
+│       └── components/
+│           ├── Transactions.jsx    # Web3 transaction interface
+│           └── Transactions.test.jsx # Transaction component tests
+├── components/             # Shared UI components
 │   └── ErrorBoundary.jsx   # Error handling wrapper
 ├── utils/                  # Reusable utility functions
 │   ├── api.js              # API communication logic
@@ -422,11 +426,7 @@ src/
 │   ├── cache.js            # Image caching utilities
 │   ├── constants.js        # Configuration constants
 │   └── config.js           # Application configuration
-└── test/                   # Test setup and utilities
-    ├── setup.js            # Test environment setup
-    ├── ChatPanel.test.jsx  # Chat component tests
-    ├── Transactions.test.jsx # Transaction component tests
-    └── ...                 # Other test files
+└── test/                   # (Removed - tests co-located with components)
 ```
 
 ---
@@ -480,7 +480,7 @@ This project includes comprehensive test coverage with:
 Tests are organized by:
 
 - `src/utils/*.test.js` - Utility function tests
-- `src/test/*test.jsx` - Component and integration tests
+- `src/components/*.test.jsx` - Component tests
 - `src/App.test.jsx` - Main application tests
 
 ### Running Tests
@@ -496,7 +496,7 @@ npm run test:watch
 npm run test:coverage
 
 # Run specific test file
-npx vitest path/to/test/file.test.js
+npx vitest src/features/chat/components/ChatPanel.test.jsx
 ```
 
 ---
@@ -554,7 +554,7 @@ npx vitest path/to/test/file.test.js
 1. Ensure all dependencies installed: `npm install`
 2. Clear Vitest cache: `npx vitest --clearCache`
 3. Check for async timing issues in tests
-4. Review test setup in `src/test/setup.js`
+4. Review test setup in `src/setupTests.js`
 
 ---
 

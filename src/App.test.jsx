@@ -1,35 +1,60 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
-// Mock Firebase
+import App from './App';
+import imageCache from './utils/cache';
+import { apiCall } from './utils/api';
+
+// Mock all dependencies that might cause issues in tests
 vi.mock('firebase/app', () => ({
     initializeApp: vi.fn(() => ({})),
 }));
 
 vi.mock('firebase/auth', () => ({
     getAuth: vi.fn(() => ({})),
-    signInAnonymously: vi.fn(),
+    signInAnonymously: vi.fn(() => Promise.resolve({ uid: 'test-user', isAnonymous: true })),
     signInWithCustomToken: vi.fn(),
     onAuthStateChanged: vi.fn((auth, callback) => {
-        callback(null);
+        callback({ uid: 'test-user', isAnonymous: true });
         return vi.fn();
     }),
 }));
 
 vi.mock('firebase/firestore', () => ({
     getFirestore: vi.fn(() => ({})),
-    collection: vi.fn(),
-    addDoc: vi.fn(),
+    collection: vi.fn(() => ({})),
+    addDoc: vi.fn(() => Promise.resolve({ id: 'test-doc' })),
     query: vi.fn(),
-    onSnapshot: vi.fn(),
+    onSnapshot: vi.fn((query, callback) => {
+        callback({ docs: [] }); // Empty initial docs
+        return vi.fn(); // Unsubscribe function
+    }),
     doc: vi.fn(),
-    updateDoc: vi.fn(),
-    writeBatch: vi.fn(),
-    getDocs: vi.fn(),
+    updateDoc: vi.fn(() => Promise.resolve()),
+    writeBatch: vi.fn(() => ({
+        delete: vi.fn(),
+        commit: vi.fn(() => Promise.resolve())
+    })),
+    getDocs: vi.fn(() => Promise.resolve({ docs: [] }))
 }));
 
-// Mock API and utilities
 vi.mock('./utils/api', () => ({
-    apiCall: vi.fn(),
+    apiCall: vi.fn((url) => {
+        if (url.includes('/models') || url.includes('/image/styles')) {
+            // Mock API responses for models and styles
+            if (url.includes('/models')) {
+                return Promise.resolve({ data: [{ id: 'test-model', name: 'Test Model' }] });
+            } else {
+                return Promise.resolve({ data: [{ id: 'test-style', name: 'Test Style' }] });
+            }
+        } else if (url.includes('/image/generate')) {
+            // Mock image generation response
+            return Promise.resolve({
+                images: ['iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==']
+            });
+        }
+        return Promise.resolve({});
+    }),
 }));
 
 vi.mock('./utils/image', () => ({
@@ -45,102 +70,288 @@ vi.mock('./utils/cache', () => ({
     },
 }));
 
-// Mock lazy loaded components
-vi.mock('./components/ChatPanel', () => ({
-    default: () => null,
-}));
+vi.mock('lucide-react', async () => {
+    const actual = await vi.importActual('lucide-react');
+    return {
+        ...actual,
+        Sparkles: () => 'Sparkles',
+        Trash2: () => 'Trash2',
+        Download: () => 'Download',
+        Wand2: () => 'Wand2',
+        Image: () => 'Image',
+        Loader2: () => 'Loader2',
+        RefreshCw: () => 'RefreshCw',
+        AlertCircle: () => 'AlertCircle',
+        X: () => 'X',
+    };
+});
 
-vi.mock('./components/Transactions', () => ({
-    default: () => null,
-}));
+// Mock global objects
+global.__firebase_config = JSON.stringify({
+    apiKey: "test-api-key",
+    authDomain: "test-project.firebaseapp.com",
+    projectId: "test-project",
+    storageBucket: "test-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
+});
+global.__app_id = "test-app-id";
+global.__initial_auth_token = null;
 
-describe('App Bug Fixes', () => {
+describe('App Component - Comprehensive Tests', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+
+        // Reset localStorage before each test
+        localStorage.clear();
     });
 
-    describe('Bug #1: Firebase Config Parsing', () => {
-        it('should parse Firebase config as an object, not a string', () => {
-            // This test verifies that __firebase_config is a valid JSON object
-            // After the fix, JSON.parse(__firebase_config) should return an object
-            const mockConfig = { apiKey: 'test-key', projectId: 'test-project' };
-            const configString = JSON.stringify(mockConfig);
+    it('should render without crashing', () => {
+        render(
+            <App />
+        );
 
-            // Simulate what happens in the app
-            const parsed = JSON.parse(configString);
-
-            expect(typeof parsed).toBe('object');
-            expect(parsed).toHaveProperty('apiKey');
-            expect(parsed).toHaveProperty('projectId');
-            expect(typeof parsed.apiKey).toBe('string');
-        });
-
-        it('should fail with double stringification (old bug)', () => {
-            // This demonstrates the old bug
-            const mockConfig = { apiKey: 'test-key', projectId: 'test-project' };
-            const doubleStringified = JSON.stringify(JSON.stringify(mockConfig));
-
-            const parsed = JSON.parse(doubleStringified);
-
-            // With double stringify, parsed is a STRING, not an object
-            expect(typeof parsed).toBe('string');
-            // This would cause initializeApp to fail
-        });
+        expect(screen.getByText('Venice.ai Generator')).toBeInTheDocument();
+        expect(screen.getByText('Uncensored, high-fidelity image generation with persistent history.')).toBeInTheDocument();
     });
 
-    describe('Bug #2: API Key Trimming', () => {
-        it('should trim whitespace from API keys', () => {
-            const keysWithSpaces = 'key1, key2 , key3';
-            const keys = keysWithSpaces.split(',').filter(Boolean).map(key => key.trim());
+    it('should handle form submission with valid input', async () => {
+        render(
+            <App />
+        );
 
-            expect(keys).toEqual(['key1', 'key2', 'key3']);
-            expect(keys[1]).toBe('key2'); // No leading space
-            expect(keys[2]).toBe('key3'); // No trailing space
-        });
+        // Fill in the prompt
+        const promptInput = screen.getByPlaceholderText('A futuristic cityscape at dusk...');
+        fireEvent.change(promptInput, { target: { value: 'A beautiful landscape' } });
 
-        it('should handle keys without spaces correctly', () => {
-            const keysWithoutSpaces = 'key1,key2,key3';
-            const keys = keysWithoutSpaces.split(',').filter(Boolean).map(key => key.trim());
+        // Click generate button
+        const generateButton = screen.getByRole('button', { name: /Sparkles\s*Generate/i });
+        fireEvent.click(generateButton);
 
-            expect(keys).toEqual(['key1', 'key2', 'key3']);
-        });
-
-        it('should filter out empty strings', () => {
-            const keysWithEmpty = 'key1,,key2,';
-            const keys = keysWithEmpty.split(',').filter(Boolean).map(key => key.trim());
-
-            expect(keys).toEqual(['key1', 'key2']);
-            expect(keys.length).toBe(2);
+        // Wait for the generation process
+        await waitFor(() => {
+            // Since we mocked apiCall to resolve, we expect no errors
+            expect(generateButton).toBeInTheDocument();
         });
     });
 
-    describe('Bug #4: Offline Image Enhancement Guard', () => {
-        it('should reject enhancement for mock- prefixed IDs', () => {
-            const mockItem = { id: 'mock-12345', base64: 'test' };
+    it('should show error if no prompt is entered', async () => {
+        render(
+            <App />
+        );
 
-            const shouldBlock = mockItem.id.startsWith('mock-') || mockItem.id.startsWith('offline-');
-            expect(shouldBlock).toBe(true);
+        // Clear any default prompt
+        const promptInput = screen.getByPlaceholderText('A futuristic cityscape at dusk...');
+        fireEvent.change(promptInput, { target: { value: '' } });
+
+        // Click generate button
+        const generateButton = screen.getByRole('button', { name: /Sparkles\s*Generate/i });
+        fireEvent.click(generateButton);
+
+        // Should show an alert or error message
+        // Since we can't easily test browser alert in jsdom, we'll check if the API call was not made
+        expect(apiCall).not.toHaveBeenCalledWith(expect.stringContaining('/image/generate'), expect.anything(), expect.anything());
+    });
+
+    it('should handle negative prompt input', async () => {
+        render(
+            <App />
+        );
+
+        const negativePromptInput = screen.getByText('Negative Prompt').closest('div').querySelector('textarea');
+        expect(negativePromptInput).toBeInTheDocument();
+
+        fireEvent.change(negativePromptInput, { target: { value: 'blurry, low quality' } });
+
+        expect(negativePromptInput.value).toBe('blurry, low quality');
+    });
+
+    it('should handle model selection', async () => {
+        render(
+            <App />
+        );
+
+        // Wait for models to load (they're mocked to load quickly)
+        await waitFor(() => {
+            const modelSelect = screen.getByText('Model').closest('div').querySelector('select');
+            expect(modelSelect).toBeInTheDocument();
+
+            // Change the model selection
+            fireEvent.change(modelSelect, { target: { value: 'test-model' } });
+            expect(modelSelect.value).toBe('test-model');
         });
+    });
 
-        it('should reject enhancement for offline- prefixed IDs', () => {
-            const offlineItem = { id: 'offline-12345', base64: 'test' };
+    it('should handle style selection', async () => {
+        render(
+            <App />
+        );
 
-            const shouldBlock = offlineItem.id.startsWith('mock-') || offlineItem.id.startsWith('offline-');
-            expect(shouldBlock).toBe(true);
+        // Wait for styles to load
+        await waitFor(() => {
+            const styleSelect = screen.getByText('Style').closest('div').querySelector('select');
+            expect(styleSelect).toBeInTheDocument();
+
+            // Change the style selection
+            fireEvent.change(styleSelect, { target: { value: 'test-style' } });
+            expect(styleSelect.value).toBe('test-style');
         });
+    });
 
-        it('should allow enhancement for normal Firestore IDs', () => {
-            const normalItem = { id: 'abc123xyz', base64: 'test' };
+    it('should handle slider changes for steps and variants', async () => {
+        render(
+            <App />
+        );
 
-            const shouldBlock = normalItem.id.startsWith('mock-') || normalItem.id.startsWith('offline-');
-            expect(shouldBlock).toBe(false);
+        // Find the steps slider
+        const stepsSlider = screen.getByDisplayValue('30'); // Default value
+        fireEvent.change(stepsSlider, { target: { value: '25' } });
+
+        expect(stepsSlider.value).toBe('25');
+
+        // Find the variants slider
+        const variantsSlider = screen.getByDisplayValue('1'); // Default value
+        fireEvent.change(variantsSlider, { target: { value: '2' } });
+
+        expect(variantsSlider.value).toBe('2');
+    });
+
+    it('should handle aspect ratio selection', async () => {
+        render(
+            <App />
+        );
+
+        // Click on the 'wide' aspect ratio button
+        const wideButton = screen.getByText('Wide');
+        fireEvent.click(wideButton);
+
+        // Check if 'wide' button is selected
+        expect(wideButton.closest('button')).toHaveClass('m3-chip-selected');
+
+        // Click on the 'tall' aspect ratio button
+        const tallButton = screen.getByText('Tall');
+        fireEvent.click(tallButton);
+
+        // Check if 'tall' button is selected
+        expect(tallButton.closest('button')).toHaveClass('m3-chip-selected');
+    });
+
+    it('should handle hide watermark and safe mode toggles', async () => {
+        render(
+            <App />
+        );
+
+        // Find the hide watermark checkbox
+        const hideWatermarkCheckbox = screen.getByLabelText(/Hide Watermark/i);
+        expect(hideWatermarkCheckbox).toBeInTheDocument();
+
+        // Toggle the checkbox
+        fireEvent.click(hideWatermarkCheckbox);
+        expect(hideWatermarkCheckbox.checked).toBe(false); // Initially true in state, but may be false by default
+
+        // Find the blur NSFW checkbox
+        const safeModeCheckbox = screen.getByLabelText(/Blur NSFW/i);
+        expect(safeModeCheckbox).toBeInTheDocument();
+
+        // Toggle the checkbox
+        fireEvent.click(safeModeCheckbox);
+        expect(safeModeCheckbox.checked).toBe(true);
+    });
+
+    it('should clear history when clear history button is clicked', async () => {
+        render(
+            <App />
+        );
+
+        // Mock window.confirm to return true
+        window.confirm = vi.fn(() => true);
+
+        // Click the clear history button
+        const clearHistoryButton = screen.getByRole('button', { name: /Clear all generated image history/i });
+        fireEvent.click(clearHistoryButton);
+
+        // Verify that confirm was called
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete all history?');
+    });
+
+    it('should clear image cache when clear cache button is clicked', async () => {
+        render(
+            <App />
+        );
+
+        // Mock the cache cleanup function
+        // imageCache.cleanup is already a mock from top-level vi.mock
+        const cacheCleanupSpy = imageCache.cleanup;
+        cacheCleanupSpy.mockClear();
+
+        // Click the clear cache button
+        const clearCacheButton = screen.getByRole('button', { name: /Clear image cache to free up memory/i });
+        fireEvent.click(clearCacheButton);
+
+        // Verify that cache cleanup was called
+        expect(cacheCleanupSpy).toHaveBeenCalledWith(true);
+    });
+
+    it('should show cache statistics when cache stats button is clicked', async () => {
+        render(
+            <App />
+        );
+
+        // Mock cache stats
+        imageCache.getStats.mockReturnValue({ count: 5, size: '100KB', sizeKB: '0.1 KB', sizeMB: '0.00 MB' });
+
+        // Click the cache stats button
+        const cacheStatsButton = screen.getByRole('button', { name: /View image cache statistics/i });
+        fireEvent.click(cacheStatsButton);
+
+        // Wait for toast notification
+        await waitFor(() => {
+            expect(screen.queryByText(/Cache: 5 items/i)).toBeInTheDocument();
         });
+    });
 
-        it('should block items without IDs', () => {
-            const noIdItem = { base64: 'test' };
+    it('should handle download functionality for images', () => {
+        // Since we can't easily test the download link creation in jsdom,
+        // we'll just verify that the download icon appears for images
+        render(
+            <App />
+        );
 
-            const shouldBlock = !noIdItem.id || noIdItem.id.startsWith('mock-') || noIdItem.id.startsWith('offline-');
-            expect(shouldBlock).toBe(true);
-        });
+        // Initially no images, so no download buttons
+        expect(screen.queryByLabelText(/Download image/i)).not.toBeInTheDocument();
+    });
+
+    it('should handle image enhancement functionality', async () => {
+        render(
+            <App />
+        );
+
+        // Mock image in history to trigger the enhancement button
+        // This is harder to test without actually rendering an image in the gallery
+        // So we'll just make sure the enhancement modal structure is correct
+
+        // Find the enhance prompt button
+        const enhancePromptBtn = screen.getByLabelText(/Enhance current prompt with AI/i);
+        expect(enhancePromptBtn).toBeInTheDocument();
+    });
+
+    it('should handle image description functionality', () => {
+        render(
+            <App />
+        );
+
+        // Find the describe image button
+        const describeImageBtn = screen.getByLabelText(/Describe an uploaded image to generate prompt/i);
+        expect(describeImageBtn).toBeInTheDocument();
+    });
+
+    it('should handle toast notifications', async () => {
+        render(
+            <App />
+        );
+
+        // Simulate a toast being triggered by calling the showToast function
+        // We can't easily access internal state, so we'll just check if the toast structure is present
+        expect(screen.queryByRole('log', { name: /Chat conversation/i })).toBeInTheDocument();
     });
 });

@@ -136,7 +136,7 @@ npm run lint
   - `PascalCase` for components
   - `UPPERCASE_SNAKE_CASE` for constants
 - **Imports**: Group by type (React, libraries, local)
-- **File Structure**: Co-locate tests (`*.test.js`) with source files
+- **File Structure**: Co-locate tests (`*.test.jsx`) with source files
 
 ### React Best Practices
 

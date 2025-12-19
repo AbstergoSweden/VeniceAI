@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Transactions from '../components/Transactions';
+import Transactions from './Transactions';
 import { BrowserProvider, Contract } from 'ethers';
 
 // Mock ethers
@@ -53,13 +53,13 @@ describe('Transactions Component', () => {
 
         // Use a standard function for mockImplementation to support 'new' keyword if needed,
         // though Vitest usually handles arrow functions too.
-        BrowserProvider.mockImplementation(function() {
+        BrowserProvider.mockImplementation(function () {
             return {
                 getSigner: vi.fn().mockResolvedValue({}),
             };
         });
 
-        Contract.mockImplementation(function() {
+        Contract.mockImplementation(function () {
             return mockContract;
         });
     });
@@ -101,8 +101,8 @@ describe('Transactions Component', () => {
         render(<Transactions />);
 
         await waitFor(() => {
-             // Look for parts of the address
-             expect(screen.getByText(/From:/)).toBeInTheDocument();
+            // Look for parts of the address
+            expect(screen.getByText(/From:/)).toBeInTheDocument();
         });
     });
 
@@ -132,7 +132,7 @@ describe('Transactions Component', () => {
         });
 
         await waitFor(() => {
-             expect(screen.getByText('Transaction successful!')).toBeInTheDocument();
+            expect(screen.getByText('Transaction successful!')).toBeInTheDocument();
         });
     });
 
