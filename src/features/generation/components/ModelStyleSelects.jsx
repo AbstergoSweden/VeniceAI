@@ -23,6 +23,7 @@ const ModelStyleSelects = ({
                         value={selectedModel}
                         onChange={(e) => onModelChange(e.target.value)}
                         className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none cursor-pointer hover:bg-black/30"
+                        aria-label="Select Model"
                     >
                         {modelsList.map(m => (
                             <option key={m.id} value={m.id} className="bg-surface-container-high text-on-surface">
@@ -32,7 +33,7 @@ const ModelStyleSelects = ({
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">
                         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </div>
                 </div>
@@ -47,6 +48,7 @@ const ModelStyleSelects = ({
                         value={selectedStyle}
                         onChange={(e) => onStyleChange(e.target.value)}
                         className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none cursor-pointer hover:bg-black/30"
+                        aria-label="Select Style"
                     >
                         <option value="none" className="bg-surface-container-high text-on-surface">None</option>
                         {stylesList.map(s => (
@@ -57,7 +59,7 @@ const ModelStyleSelects = ({
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">
                         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </div>
                 </div>

@@ -111,8 +111,8 @@ describe('App Component - Comprehensive Tests', () => {
             <App />
         );
 
-        expect(screen.getByText('Venice.ai Generator')).toBeInTheDocument();
-        expect(screen.getByText('Uncensored, high-fidelity image generation with persistent history.')).toBeInTheDocument();
+        expect(screen.getByText('Venice Generator')).toBeInTheDocument();
+        expect(screen.getByText('Uncensored • Private • High Fidelity')).toBeInTheDocument();
     });
 
     it('should handle form submission with valid input', async () => {
@@ -121,7 +121,7 @@ describe('App Component - Comprehensive Tests', () => {
         );
 
         // Fill in the prompt
-        const promptInput = screen.getByPlaceholderText('A futuristic cityscape at dusk...');
+        const promptInput = screen.getByPlaceholderText(/Describe your imagination/i);
         fireEvent.change(promptInput, { target: { value: 'A beautiful landscape' } });
 
         // Click generate button
@@ -141,7 +141,7 @@ describe('App Component - Comprehensive Tests', () => {
         );
 
         // Clear any default prompt
-        const promptInput = screen.getByPlaceholderText('A futuristic cityscape at dusk...');
+        const promptInput = screen.getByPlaceholderText(/Describe your imagination/i);
         fireEvent.change(promptInput, { target: { value: '' } });
 
         // Click generate button
@@ -222,18 +222,18 @@ describe('App Component - Comprehensive Tests', () => {
         );
 
         // Click on the 'wide' aspect ratio button
-        const wideButton = screen.getByText('Wide');
+        const wideButton = screen.getByText('Landscape');
         fireEvent.click(wideButton);
 
         // Check if 'wide' button is selected
-        expect(wideButton.closest('button')).toHaveClass('m3-chip-selected');
+        expect(wideButton.closest('button')).toHaveClass('bg-primary/20');
 
         // Click on the 'tall' aspect ratio button
-        const tallButton = screen.getByText('Tall');
+        const tallButton = screen.getByText('Portrait');
         fireEvent.click(tallButton);
 
         // Check if 'tall' button is selected
-        expect(tallButton.closest('button')).toHaveClass('m3-chip-selected');
+        expect(tallButton.closest('button')).toHaveClass('bg-primary/20');
     });
 
     it('should handle hide watermark and safe mode toggles', async () => {
@@ -341,7 +341,7 @@ describe('App Component - Comprehensive Tests', () => {
         );
 
         // Find the describe image button
-        const describeImageBtn = screen.getByLabelText(/Describe an uploaded image to generate prompt/i);
+        const describeImageBtn = screen.getByLabelText(/Describe an uploaded image/i);
         expect(describeImageBtn).toBeInTheDocument();
     });
 

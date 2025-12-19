@@ -24,6 +24,11 @@ const GenerationSliders = ({
                     onChange={(e) => onStepsChange(Number(e.target.value))}
                     className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary hover:accent-primary/80 transition-all"
                     id="steps-slider"
+                    aria-label="Generation Steps"
+                    aria-valuemin="10"
+                    aria-valuemax="50"
+                    aria-valuenow={steps}
+                    aria-valuetext={`${steps} steps`}
                 />
                 <div className="flex justify-between text-[10px] text-white/20 mt-1">
                     <span>Fast</span>
@@ -43,8 +48,13 @@ const GenerationSliders = ({
                     onChange={(e) => onVariantsChange(Number(e.target.value))}
                     className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary hover:accent-primary/80 transition-all"
                     id="variants-slider"
+                    aria-label="Generation Variants"
+                    aria-valuemin="1"
+                    aria-valuemax="4"
+                    aria-valuenow={variants}
+                    aria-valuetext={`${variants} variant${variants !== 1 ? 's' : ''}`}
                 />
-                 <div className="flex justify-between text-[10px] text-white/20 mt-1">
+                <div className="flex justify-between text-[10px] text-white/20 mt-1">
                     <span>1</span>
                     <span>4</span>
                 </div>

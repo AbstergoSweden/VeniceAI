@@ -354,7 +354,7 @@ const AppContent = () => {
                             whileHover={{ scale: 1.05, rotate: 5 }}
                             transition={{ type: "spring", stiffness: 300 }}
                             src="https://preview.redd.it/73z6v668xffc1.jpeg?width=1055&format=pjpg&auto=webp&s=b15ae1f6d53d93bf004d8bbff24d5135026bbd2d"
-                            alt="Venice.ai Logo"
+                            alt="Venice.ai Generator Logo"
                             className="relative w-24 h-24 rounded-3xl object-cover shadow-2xl border-2 border-white/10"
                         />
                     </div>
@@ -452,13 +452,13 @@ const AppContent = () => {
 
                 {/* Chat Panel Section */}
                 <div className="mb-12">
-                     <Suspense fallback={
+                    <Suspense fallback={
                         <div className="h-[600px] bg-surface/30 rounded-2xl flex items-center justify-center border border-white/5">
                             <LoadingComponent message="Loading chat interface..." />
                         </div>
                     }>
                         <div className="h-[700px]">
-                             <ChatPanel
+                            <ChatPanel
                                 chatHistory={chatHistory}
                                 setChatHistory={setChatHistory}
                                 systemPrompt={systemPrompt}

@@ -56,6 +56,27 @@ vi.mock('./utils/cache', () => ({
   },
 }));
 
+vi.mock('lucide-react', async () => {
+  const actual = await vi.importActual('lucide-react');
+  return {
+    ...actual,
+    Sparkles: () => 'Sparkles',
+    Trash2: () => 'Trash2',
+    Download: () => 'Download',
+    Wand2: () => 'Wand2',
+    Image: () => 'Image',
+    Loader2: () => 'Loader2',
+    RefreshCw: () => 'RefreshCw',
+    AlertCircle: () => 'AlertCircle',
+    X: () => 'X',
+    Settings2: () => 'Settings2',
+    Square: () => 'Square',
+    RectangleHorizontal: () => 'RectangleHorizontal',
+    RectangleVertical: () => 'RectangleVertical',
+    ImageIcon: () => 'ImageIcon',
+  };
+});
+
 // Mock the config
 global.__firebase_config = JSON.stringify({
   apiKey: "test-api-key",

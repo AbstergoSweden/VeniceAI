@@ -28,6 +28,7 @@ const PromptInput = ({
                         disabled={loading}
                         className="text-[10px] bg-white/5 hover:bg-white/10 border border-white/10 rounded-md py-1.5 px-2.5 flex items-center gap-1 transition-colors"
                         title="Generate prompt from idea"
+                        aria-label="Generate prompt from idea"
                     >
                         {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-secondary" />} Idea
                     </Motion.button>
@@ -39,6 +40,7 @@ const PromptInput = ({
                         disabled={loading}
                         className="text-[10px] bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary-light rounded-md py-1.5 px-2.5 flex items-center gap-1 transition-colors"
                         title="Enhance current prompt with AI"
+                        aria-label="Enhance current prompt with AI"
                     >
                         {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />} Enhance
                     </Motion.button>
@@ -49,6 +51,7 @@ const PromptInput = ({
                         onClick={onDescribe}
                         className="text-[10px] bg-tertiary/10 hover:bg-tertiary/20 border border-tertiary/30 text-tertiary-light rounded-md py-1.5 px-2.5 flex items-center gap-1 transition-colors"
                         title="Describe an uploaded image"
+                        aria-label="Describe an uploaded image"
                     >
                         <ImageIcon className="w-3 h-3" /> Describe
                     </Motion.button>

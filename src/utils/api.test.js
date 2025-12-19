@@ -24,6 +24,61 @@ describe('apiCall Logic', () => {
         vi.clearAllMocks();
     });
 
+    it('returns data on success', async () => {
+        const mockData = { result: 'success' };
+        global.fetch.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            headers: { get: () => 'application/json' },
+            json: async () => mockData
+        });
+
+        const result = await apiCall('https://test.com', {}, mockConfig);
+        expect(result).toEqual(mockData);
+    });
+
+
+
+    it('handles binary responses (arrayBuffer)', async () => {
+        const mockArrayBuffer = new ArrayBuffer(8);
+        global.fetch.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            headers: {
+                get: (header) => header === 'content-type' ? 'image/png' : null
+            },
+            arrayBuffer: async () => mockArrayBuffer
+        });
+
+        // apiCall(url, data, config, initialKeyIndex, isBinary)
+        const result = await apiCall('https://test.com', { prompt: 'test' }, mockConfig, 0, true);
+        expect(result).toBeInstanceOf(ArrayBuffer);
+    });
+
+    it('retries on 429 Too Many Requests', async () => {
+        // First call: 429
+        global.fetch.mockResolvedValueOnce({
+            ok: false,
+            status: 429,
+            json: async () => ({ error: 'Too Many Requests' })
+        });
+        // Second call: Success
+        global.fetch.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            headers: { get: () => 'application/json' },
+            json: async () => ({ success: true })
+        });
+
+        // We assume logic handles waiting or just retrying. 
+        // If apiCall implements delay, this test might run slow without fake timers.
+        // Assuming apiCall retries with next key immediately or after delay.
+        // With rotation, it should try next key.
+        const result = await apiCall('https://test.com', {}, mockConfig);
+        expect(result).toEqual({ success: true });
+        expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+
     it('wraps around to the first key if starting from a later index', async () => {
         // Mock fetch to always return 401
         global.fetch.mockResolvedValue({

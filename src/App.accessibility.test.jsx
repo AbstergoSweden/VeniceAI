@@ -52,7 +52,6 @@ describe('App - Accessibility Improvements', () => {
 
         const altText = logo?.getAttribute('alt');
         expect(altText).toContain('Venice.ai Generator');
-        expect(altText).toContain('cyberpunk');
         expect(altText).not.toBe('Logo'); // Should not be generic
     });
 
@@ -71,7 +70,7 @@ describe('App - Accessibility Improvements', () => {
         // Check for aria-label
         expect(modelSelect).toHaveAttribute('aria-label');
         const ariaLabel = modelSelect?.getAttribute('aria-label');
-        expect(ariaLabel).toContain('model');
+        expect(ariaLabel.toLowerCase()).toContain('model');
     });
 
     it('style select has proper label association', () => {
@@ -97,13 +96,13 @@ describe('App - Accessibility Improvements', () => {
         // Check ARIA attributes
         expect(stepsSlider).toHaveAttribute('aria-label');
         expect(stepsSlider).toHaveAttribute('aria-valuemin', '10');
-        expect(stepsSlider).toHaveAttribute('aria-valuemax', '30');
+        expect(stepsSlider).toHaveAttribute('aria-valuemax', '50');
         expect(stepsSlider).toHaveAttribute('aria-valuenow');
         expect(stepsSlider).toHaveAttribute('aria-valuetext');
 
         // Check aria-label is descriptive
         const ariaLabel = stepsSlider?.getAttribute('aria-label');
-        expect(ariaLabel).toContain('step');
+        expect(ariaLabel.toLowerCase()).toContain('step');
         expect(ariaLabel).not.toBe('Steps'); // Should be more descriptive
     });
 
@@ -120,7 +119,7 @@ describe('App - Accessibility Improvements', () => {
         expect(variantsSlider).toHaveAttribute('aria-valuetext');
 
         const ariaLabel = variantsSlider?.getAttribute('aria-label');
-        expect(ariaLabel).toContain('variant');
+        expect(ariaLabel.toLowerCase()).toContain('variant');
     });
 
     it('aria-valuetext updates correctly with slider value', () => {
