@@ -182,7 +182,7 @@ The app uses Venice.ai API keys configured via environment variables.
 cp .env.example .env
 ```
 
-2. Update `VITE_VENICE_API_KEYS` with your keys.
+1. Update `VITE_VENICE_API_KEYS` with your keys.
 
 ```env
 VITE_VENICE_API_KEYS=your-primary-key,your-backup-key-1
@@ -336,7 +336,7 @@ The app uses Firebase for:
 
 Data structure:
 
-```
+```text
 artifacts/
   └── {appId}/
       └── users/
@@ -402,7 +402,7 @@ This project follows JSDoc-style documentation standards for JavaScript/JSX code
 
 ### Directory Structure
 
-```
+```text
 src/
 ├── App.jsx                 # Main application component
 ├── App.test.jsx            # App component tests
@@ -441,7 +441,7 @@ src/
 - Implement responsive design for all screen sizes
 - Ensure accessibility with ARIA labels and semantic HTML
 
-### State Management
+### State Management Practices
 
 - Use React hooks (`useState`, `useEffect`, `useCallback`) appropriately
 - Separate local and global state concerns
@@ -466,7 +466,7 @@ src/
 
 ## Testing Strategy
 
-### Test Coverage
+### Coverage Overview
 
 This project includes comprehensive test coverage with:
 
