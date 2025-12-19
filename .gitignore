@@ -1,44 +1,41 @@
-# Dependencies
-node_modules/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+# -----------------------------
+# GitIgnore Venice_AI ImageGen
+# -----------------------------
 
-# Build Outputs
+# -----------------------------
+# Build & Distribution
+# -----------------------------
 dist/
 dist-ssr/
+build/
 release/
+out/
+app/dist/
 *.local
 
+# -----------------------------
 # Environment & Secrets
+# -----------------------------
+# Standard dotenv files
 .env
+.env.development
+.env.test
+.env.production
 .env.local
 .env.*.local
 .env.test.local
 .env.production.local
 .env.development.local
+
+# Secret patterns and keys
 *secret*
 *secrets*
 firebase-config.js
 *-config.private.js
 
-# AI Context Files (Internal Development Only)
-.gemini/
-.qwen/
-GEMINI.md
-QWEN.md
-*.ai.md
-.adjustments
-.agent
-agent.md
-.jules
-
-# Testing & Coverage
-coverage/
-.nyc_output/
-*.coverage
-
+# -----------------------------
 # Logs
+# -----------------------------
 logs/
 *.log
 npm-debug.log*
@@ -47,39 +44,58 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# -----------------------------
+# AI Context Files (Internal)
+# -----------------------------
+.gemini/
+.qwen/
+GEMINI.md
+QWEN.md
+*.ai.md
+
+# -----------------------------
+# Testing & Coverage
+# -----------------------------
+coverage/
+.nyc_output/
+*.coverage
+
+# -----------------------------
+# Temporary Files & Cache
+# -----------------------------
+.temp/
+.tmp/
+tmp/
+*.tmp
+.cache/
+.eslintcache
+.stylelintcache
+
+# -----------------------------
 # Editor & IDE
+# -----------------------------
 .vscode/*
 !.vscode/extensions.json
 .idea/
 *.swp
 *.swo
 *~
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Temporary Files
-*.tmp
-.temp/
-tmp/
-
-# OS Files
+# -----------------------------
+# OS & System Files
+# -----------------------------
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Cache
-.cache/
-.eslintcache
-.stylelintcache
-
-# Electron
-out/
-app/dist/
-
-# User Data (if any)
+# -----------------------------
+# User Data
+# -----------------------------
 user-data/
 local-storage/
+node_modules

@@ -1,0 +1,100 @@
+---
+meta:
+  last_updated: "2024-12-17"
+  source: "Venice.ai Public Documentation & API Swagger"
+  status: "Verified"
+
+api_configuration:
+  base_url: "https://api.venice.ai/api/v1"
+  dashboard_url: "https://venice.ai/home"
+  documentation_url: "https://docs.venice.ai"
+  authentication:
+    type: "Bearer"
+    header: "Authorization"
+    format: "Bearer <VENICE_API_KEY>"
+
+privacy_architecture:
+  storage_policy: "No data retention on servers. Requests are proxied to decentralized GPUs and responses are streamed back."
+  logging: "Minimal metadata only (IP, Timezone) for non-account users. No prompt/completion logging."
+  encryption: "SSL/TLS for transport. Local browser storage recommended for client-side history."
+
+endpoints:
+  chat_completions:
+    path: "/chat/completions"
+    method: "POST"
+    compatibility: "OpenAI API Compatible"
+    special_parameters:
+      venice_parameters:
+        type: "object"
+        properties:
+          include_venice_system_prompt:
+            type: "boolean"
+            description: "If false, disables the default system prompt."
+          enable_web_search:
+            type: "string"
+            enum: ["on", "off", "auto"]
+            description: "Enables RAG via web search."
+          enable_web_scraping:
+            type: "boolean"
+          strip_thinking_response:
+            type: "boolean"
+            description: "Hides <think> tags from reasoning models."
+  
+  models:
+    path: "/models"
+    method: "GET"
+    description: "Lists available models."
+
+  image_generation:
+    path: "/image/generate"
+    method: "POST"
+    description: "Generate images using Venice models."
+    parameters:
+      model: "string (required)"
+      prompt: "string (required)"
+      negative_prompt: "string"
+      style_preset: "string (e.g., '3D Model', 'Cinematic', 'Anime')"
+      height: "integer (default: 1024)"
+      width: "integer (default: 1024)"
+      steps: "integer"
+      cfg_scale: "number"
+      safe_mode: "boolean (default: true)"
+      return_binary: "boolean"
+      hide_watermark: "boolean"
+
+model_catalog:
+  text_inference:
+    - id: "venice-uncensored"
+      context_window: "33k"
+      type: "General Purpose"
+    - id: "llama-3.3-70b"
+      context_window: "131k"
+      type: "High Intelligence"
+    - id: "qwen3-235b"
+      context_window: "131k"
+      type: "Reasoning/Coding"
+    - id: "deepseek-r1-671b"
+      context_window: "131k"
+      type: "Advanced Reasoning"
+    - id: "mistral-31-24b"
+      context_window: "131k"
+      type: "Vision/Text"
+  
+  image_generation:
+    - id: "venice-sd35"
+      description: "Stable Diffusion 3.5"
+    - id: "fluently-xl"
+    - id: "lustify-sdxl"
+      description: "Uncensored Art"
+    - id: "qwen-image"
+    - id: "z-image-turbo"
+
+limits_and_pricing:
+  tier_structure:
+    explorer: "Free, lower rate limits."
+    pro: "Paid, higher limits, access to premium models."
+  rate_limits:
+    headers:
+      - "x-ratelimit-limit-requests"
+      - "x-ratelimit-remaining-requests"
+      - "x-ratelimit-reset-requests"
