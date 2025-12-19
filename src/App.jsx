@@ -2,13 +2,14 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, query, onSnapshot, writeBatch, getDocs } from 'firebase/firestore';
-import { Sparkles, Trash2, Download, Image as ImageIcon, Loader2, RefreshCw, AlertCircle, X } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { apiCall } from './utils/api';
 
 import imageCache from './utils/cache';
 import { syncVeniceModels, DEFAULT_CHAT_MODELS } from './utils/modelSync';
-import { motion as Motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { CONFIG } from './utils/config';
+import { ToastProvider, useToast } from './components/ui/Toast';
 
 import { useImageGeneration } from './features/generation/hooks/useImageGeneration';
 import { usePromptEnhancement } from './features/generation/hooks/usePromptEnhancement';
@@ -46,39 +47,27 @@ const Transactions = lazy(() => import('./features/web3/components/Transactions'
 
 /**
  * Loading component for lazy-loaded components.
- * @param {object} props - Component props.
- * @param {string} [props.message="Loading..."] - The message to display while loading.
- * @returns {JSX.Element} The loading component JSX.
  */
 const LoadingComponent = ({ message = "Loading..." }) => (
-    <div className="flex flex-col items-center justify-center p-8">
+    <div className="flex flex-col items-center justify-center p-8 text-on-surface-variant">
         <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-        <p className="text-on-surface-variant">{message}</p>
+        <p className="text-sm font-medium">{message}</p>
     </div>
 );
 
 
 // --- CONFIGURATION ---
-// --- CONFIGURATION ---
 // Loaded from utils/config.js
 
-// --- VENICE CHAT MODELS ---
-// Models are now dynamically fetched from API via modelSync utility
-// DEFAULT_CHAT_MODELS imported from ./utils/modelSync as fallback
-const DEFAULT_CHAT_MODEL = DEFAULT_CHAT_MODELS[0]?.id || 'mistral-31-24b'; // Venice Medium - vision capable
-
-
-
+const DEFAULT_CHAT_MODEL = DEFAULT_CHAT_MODELS[0]?.id || 'mistral-31-24b';
 
 // --- FIREBASE INITIALIZATION ---
 let firebaseConfig, appId;
 
-// Validate and load Firebase configuration
 if (typeof __firebase_config === 'undefined') {
     throw new Error("Firebase configuration is required but not provided. Please configure firebase in vite.config.js or build process.");
 } else {
     try {
-        // Handle both string (production build) and object (Vite dev) formats
         firebaseConfig = typeof __firebase_config === 'string'
             ? JSON.parse(__firebase_config)
             : __firebase_config;
@@ -89,30 +78,17 @@ if (typeof __firebase_config === 'undefined') {
 
 appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-// Initialize Firebase only once
 let app, auth, db;
 try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
 } catch (e) {
-    // Handle case where app is already initialized or config is bad
     console.error("Firebase initialization failed:", e);
-    // Re-throw to fail fast in production
     throw e;
 }
 
-
-
-// --- HELPER FUNCTIONS ---
-// Moved to src/utils/api.js and src/utils/image.js
-
-/**
- * Main Application Component.
- * Handles the state and logic for the image generator, chat, and history.
- * @returns {JSX.Element} The main application JSX component.
- */
-export default function App() {
+const AppContent = () => {
     // --- STATE ---
     const [user, setUser] = useState(null);
     const [history, setHistory] = useState([]);
@@ -134,19 +110,7 @@ export default function App() {
     const [stylesList, setStylesList] = useState([]);
     const [chatModels, setChatModels] = useState(DEFAULT_CHAT_MODELS);
 
-    // Toast State & Handler (Moved up to prevent TDZ errors in hooks)
-    const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
-    const [toastTimeoutId, setToastTimeoutId] = useState(null);
-
-    const showToast = (message, type = 'info') => {
-        if (toastTimeoutId) clearTimeout(toastTimeoutId);
-        setToast({ show: true, message, type });
-        const id = setTimeout(() => {
-            setToast({ show: false, message: '', type: 'info' });
-            setToastTimeoutId(null);
-        }, 4000);
-        setToastTimeoutId(id);
-    };
+    const { showToast } = useToast();
 
     // Chat Hook (for ChatPanel)
     const { callVeniceChat } = useVeniceChat();
@@ -208,15 +172,6 @@ export default function App() {
     const error = generationError || upscaleError;
     const statusMessage = generationStatus || upscaleStatus;
 
-
-
-    // Toast Cleanup Effect
-    useEffect(() => {
-        return () => {
-            if (toastTimeoutId) clearTimeout(toastTimeoutId);
-        };
-    }, [toastTimeoutId]);
-
     // --- EFFECTS ---
 
     // 1. Auth
@@ -233,7 +188,6 @@ export default function App() {
             } catch (err) {
                 console.error("Auth failed:", err);
                 showToast("Authentication failed. Running in offline mode - history will not be saved.", 'warning');
-                // Set a mock user so the app can still function
                 setUser({ uid: 'offline-user', isAnonymous: true, offline: true });
             }
         };
@@ -270,7 +224,6 @@ export default function App() {
             } catch (e) {
                 console.error("Failed to fetch models/styles", e);
                 showToast("Could not load models from API. Using fallback model.", 'warning');
-                // Fallbacks if API fails essentially (allows UI to render)
                 setModelsList([{ id: "fluently-xl", name: "Fluently XL" }]);
                 setSelectedModel("fluently-xl");
             }
@@ -295,7 +248,6 @@ export default function App() {
                 }
             } catch (error) {
                 console.error('[ModelSync] Failed to sync models:', error);
-                // Keep using defaults
             }
         };
         syncModels();
@@ -311,7 +263,6 @@ export default function App() {
 
         const collectionPath = `artifacts/${appId}/users/${user.uid}/${CONFIG.COLLECTION_NAME}`;
 
-        // Safety check for DB access
         try {
             const q = query(collection(db, ...collectionPath.split('/')));
 
@@ -334,18 +285,6 @@ export default function App() {
 
     // --- LOGIC ---
 
-
-
-    /**
-     * Handles the image generation process.
-     * @param {Event} e - Form submission event.
-     * @returns {Promise<void>}
-     */
-    /**
-     * Handles the image generation process.
-     * @param {Event} e - Form submission event.
-     * @returns {Promise<void>}
-     */
     const handleGenerate = (e) => {
         generateImage(e, {
             selectedModel,
@@ -361,12 +300,6 @@ export default function App() {
         });
     };
 
-
-
-    /**
-     * Clears all generated image history.
-     * @returns {Promise<void>}
-     */
     const clearHistory = async () => {
         if (!window.confirm("Are you sure you want to delete all history?")) return;
         try {
@@ -374,7 +307,6 @@ export default function App() {
             const colRef = collection(db, ...collectionPath.split('/'));
             const snapshot = await getDocs(colRef);
 
-            // Chunk deletions into batches of 500
             const CHUNK_SIZE = 500;
             const chunks = [];
             for (let i = 0; i < snapshot.docs.length; i += CHUNK_SIZE) {
@@ -387,23 +319,13 @@ export default function App() {
                 await batch.commit();
             }
         } catch {
-            // alert("Failed to clear history.");
-            setHistory([]); // Local clear at least
+            setHistory([]);
         }
     };
 
-    // Chat state
     const [chatHistory, setChatHistory] = useState([]);
     const [systemPrompt, setSystemPrompt] = useState('');
 
-
-
-    /**
-     * Downloads the generated image.
-     * @param {string} base64 - Base64 string of the image.
-     * @param {string} seed - Seed used for generation (for filename).
-     * @returns {void}
-     */
     const downloadImage = (base64, seed) => {
         const link = document.createElement('a');
         link.href = `data:image/jpeg;base64,${base64}`;
@@ -413,30 +335,40 @@ export default function App() {
         document.body.removeChild(link);
     };
 
-    // --- RENDER ---
     return (
-        <div className="min-h-screen bg-surface-dim text-on-surface font-sans selection:bg-primary selection:text-on-primary">
-            {/* Header */}
-            <div className="container mx-auto p-4 md:p-8">
-                <header className="text-center mb-10">
-                    <div className="relative inline-block group">
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/40 via-secondary/30 to-tertiary/40 blur-2xl opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
-                        <img
+        <div className="min-h-screen bg-surface-dim text-on-surface font-sans selection:bg-primary selection:text-white">
+            <div className="fixed inset-0 bg-gradient-to-br from-surface-dim via-surface to-surface-dim pointer-events-none -z-10" />
+            <div className="fixed inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none -z-10" />
+
+            <div className="container mx-auto p-4 lg:p-8 max-w-[1600px]">
+                {/* Header */}
+                <Motion.header
+                    initial={{ y: -50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex flex-col items-center justify-center mb-12 relative z-10"
+                >
+                    <div className="relative group mb-6">
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary via-secondary to-tertiary blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700"></div>
+                        <Motion.img
+                            whileHover={{ scale: 1.05, rotate: 5 }}
+                            transition={{ type: "spring", stiffness: 300 }}
                             src="https://preview.redd.it/73z6v668xffc1.jpeg?width=1055&format=pjpg&auto=webp&s=b15ae1f6d53d93bf004d8bbff24d5135026bbd2d"
-                            alt="Venice.ai Generator application logo featuring cyberpunk aesthetic with neon purple and blue accents"
-                            className="relative mx-auto h-24 w-24 rounded-full mb-4 object-cover border-2 border-primary/30 shadow-elevation-4 group-hover:border-primary/60 group-hover:scale-105 transition-all duration-300 ease-spring"
+                            alt="Venice.ai Logo"
+                            className="relative w-24 h-24 rounded-3xl object-cover shadow-2xl border-2 border-white/10"
                         />
                     </div>
-                    <h1 className="text-4xl font-extrabold text-gradient-primary">
-                        Venice.ai Generator
+                    <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-300 to-tertiary tracking-tight text-center">
+                        Venice Generator
                     </h1>
-                    <p className="text-on-surface-variant mt-3 text-sm max-w-lg mx-auto">
-                        Uncensored, high-fidelity image generation with persistent history.
+                    <p className="mt-4 text-on-surface-variant/80 text-sm font-medium tracking-wide border border-white/5 rounded-full px-4 py-1.5 bg-white/5 backdrop-blur-sm">
+                        Uncensored • Private • High Fidelity
                     </p>
-                </header>
+                </Motion.header>
 
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* LEFT COLUMN: CONTROLS */}
+                {/* Main Content Area */}
+                <div className="flex flex-col lg:flex-row gap-8 mb-12">
+                    {/* Left: Controls */}
                     <ControlPanel
                         prompt={prompt}
                         onPromptChange={setPrompt}
@@ -475,20 +407,37 @@ export default function App() {
                         }}
                     />
 
-                    {/* RIGHT COLUMN: GALLERY */}
-                    <div className="lg:w-2/3">
-                        <div className="m3-surface p-6 min-h-[600px]">
+                    {/* Right: Gallery */}
+                    <Motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="lg:w-2/3 flex flex-col gap-6"
+                    >
+                        <div className="bg-surface/30 backdrop-blur-xl border border-white/5 rounded-2xl p-6 min-h-[600px] shadow-xl relative overflow-hidden">
+                            {/* Status Overlay */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-tertiary opacity-20" />
+
                             {error && (
-                                <div className="mb-4 bg-error-container border border-error/30 text-on-error-container p-4 rounded-xl flex items-center gap-3 animate-fade-in">
-                                    <AlertCircle className="w-5 h-5 text-error" /> {error}
-                                </div>
+                                <Motion.div
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mb-6 bg-error-container/20 border border-error/20 text-error-container p-4 rounded-xl flex items-center gap-3"
+                                >
+                                    <AlertCircle className="w-5 h-5 text-error" />
+                                    <span className="text-sm font-medium text-error">{error}</span>
+                                </Motion.div>
                             )}
 
                             {generating && (
-                                <div className="mb-6 flex flex-col items-center justify-center py-16 bg-surface-container-high rounded-2xl border border-dashed border-outline-variant animate-pulse-glow">
-                                    <Loader2 className="w-14 h-14 text-primary animate-spin mb-4" />
-                                    <p className="text-primary font-medium">{statusMessage}</p>
-                                </div>
+                                <Motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="mb-8 flex flex-col items-center justify-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/10"
+                                >
+                                    <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+                                    <p className="text-on-surface font-medium animate-pulse">{statusMessage}</p>
+                                </Motion.div>
                             )}
 
                             <ImageGallery
@@ -498,33 +447,41 @@ export default function App() {
                                 onEnhance={handleOpenEnhance}
                             />
                         </div>
+                    </Motion.div>
+                </div>
+
+                {/* Chat Panel Section */}
+                <div className="mb-12">
+                     <Suspense fallback={
+                        <div className="h-[600px] bg-surface/30 rounded-2xl flex items-center justify-center border border-white/5">
+                            <LoadingComponent message="Loading chat interface..." />
+                        </div>
+                    }>
+                        <div className="h-[700px]">
+                             <ChatPanel
+                                chatHistory={chatHistory}
+                                setChatHistory={setChatHistory}
+                                systemPrompt={systemPrompt}
+                                setSystemPrompt={setSystemPrompt}
+                                memoryLimit={20}
+                                callVeniceChat={callVeniceChat}
+                                defaultChatModel={DEFAULT_CHAT_MODEL}
+                            />
+                        </div>
+                    </Suspense>
+                </div>
+
+                {/* Transactions Section */}
+                <div className="mb-12">
+                    <div className="bg-surface/30 backdrop-blur-xl border border-white/5 p-8 rounded-2xl shadow-xl">
+                        <Suspense fallback={<LoadingComponent message="Loading transaction interface..." />}>
+                            <Transactions />
+                        </Suspense>
                     </div>
                 </div>
             </div>
-            {/* Chat Panel */}
-            <Suspense fallback={<div className="m3-surface flex flex-col h-full"><LoadingComponent message="Loading chat interface..." /></div>}>
-                <ChatPanel
-                    chatHistory={chatHistory}
-                    setChatHistory={setChatHistory}
-                    systemPrompt={systemPrompt}
-                    setSystemPrompt={setSystemPrompt}
-                    memoryLimit={20}
-                    callVeniceChat={callVeniceChat}
-                    defaultChatModel={DEFAULT_CHAT_MODEL}
-                />
-            </Suspense>
 
-            {/* Transactions Section */}
-            <div className="container mx-auto p-4 md:p-8 mt-10">
-                <div className="m3-surface-elevated p-6 rounded-2xl">
-                    <h2 className="text-2xl font-bold mb-6 text-gradient-primary">Crypto Transactions</h2>
-                    <Suspense fallback={<LoadingComponent message="Loading transaction interface..." />}>
-                        <Transactions />
-                    </Suspense>
-                </div>
-            </div>
-
-            {/* Enhancement Modal */}
+            {/* Modals */}
             <EnhanceModal
                 isOpen={enhanceModalOpen}
                 onClose={() => setEnhanceModalOpen(false)}
@@ -536,7 +493,6 @@ export default function App() {
                 onSubmit={handleEnhance}
             />
 
-            {/* Image Description Modal */}
             <DescribeModal
                 isOpen={describeModalOpen}
                 onClose={() => {
@@ -555,39 +511,14 @@ export default function App() {
                     setImageDescription('');
                 }}
             />
-            {/* Toast Notification */}
-            <AnimatePresence>
-                {toast.show && (
-                    <Motion.div
-                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                        className={`fixed bottom-4 right-4 z-50 p-4 rounded-2xl shadow-elevation-4 border backdrop-blur-sm max-w-md ${toast.type === 'success' ? 'bg-success-container/95 border-success/30 text-on-success-container' :
-                            toast.type === 'warning' ? 'bg-warning-container/95 border-warning/30 text-on-warning-container' :
-                                toast.type === 'error' ? 'bg-error-container/95 border-error/30 text-on-error-container' :
-                                    'bg-info-container/95 border-info/30 text-on-info-container'
-                            }`}>
-                        <div className="flex items-start gap-3">
-                            {toast.type === 'success' && <div className="text-success text-lg">✓</div>}
-                            {toast.type === 'warning' && <div className="text-warning text-lg">⚠</div>}
-                            {toast.type === 'error' && <div className="text-error text-lg">✕</div>}
-                            {toast.type === 'info' && <div className="text-info text-lg">ℹ</div>}
-                            <div className="flex-1">
-                                <p className="text-sm font-medium">{toast.message}</p>
-                            </div>
-                            <button
-                                onClick={() => setToast({ show: false, message: '', type: 'info' })}
-                                className="text-on-surface-variant hover:text-on-surface transition p-0.5 rounded-full hover:bg-surface/20"
-                                aria-label="Close notification"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </Motion.div>
-                )}
-            </AnimatePresence>
         </div>
     );
+};
+
+export default function App() {
+    return (
+        <ToastProvider>
+            <AppContent />
+        </ToastProvider>
+    );
 }
-
-
