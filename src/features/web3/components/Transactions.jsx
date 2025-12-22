@@ -223,12 +223,12 @@ const Transactions = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="p-5 sm:w-96 w-full flex flex-col justify-start items-center blue-glassmorphism bg-white/5 backdrop-blur-lg rounded-xl border border-white/10 shadow-xl"
+                        className="p-5 sm:w-96 w-full max-w-full flex flex-col justify-start items-center blue-glassmorphism bg-white/5 backdrop-blur-lg rounded-xl border border-white/10 shadow-xl overflow-hidden"
                     >
-                        <input placeholder="Address To" name="addressTo" type="text" onChange={(e) => handleChange(e, "addressTo")} className="my-2 w-full rounded-lg p-2 outline-none bg-black/20 text-on-surface border border-white/10 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-white/30" />
-                        <input placeholder="Amount (ETH)" name="amount" type="number" onChange={(e) => handleChange(e, "amount")} className="my-2 w-full rounded-lg p-2 outline-none bg-black/20 text-on-surface border border-white/10 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-white/30" />
-                        <input placeholder="Keyword (Gif)" name="keyword" type="text" onChange={(e) => handleChange(e, "keyword")} className="my-2 w-full rounded-lg p-2 outline-none bg-black/20 text-on-surface border border-white/10 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-white/30" />
-                        <input placeholder="Enter Message" name="message" type="text" onChange={(e) => handleChange(e, "message")} className="my-2 w-full rounded-lg p-2 outline-none bg-black/20 text-on-surface border border-white/10 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-white/30" />
+                        <input placeholder="Address To" name="addressTo" type="text" onChange={(e) => handleChange(e, "addressTo")} className="my-2 w-full max-w-full rounded-lg p-2 outline-none bg-black/20 text-on-surface border border-white/10 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-white/30 min-h-[44px] shrink-0" />
+                        <input placeholder="Amount (ETH)" name="amount" type="number" onChange={(e) => handleChange(e, "amount")} className="my-2 w-full max-w-full rounded-lg p-2 outline-none bg-black/20 text-on-surface border border-white/10 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-white/30 min-h-[44px] shrink-0" />
+                        <input placeholder="Keyword (Gif)" name="keyword" type="text" onChange={(e) => handleChange(e, "keyword")} className="my-2 w-full max-w-full rounded-lg p-2 outline-none bg-black/20 text-on-surface border border-white/10 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-white/30 min-h-[44px] shrink-0" />
+                        <input placeholder="Enter Message" name="message" type="text" onChange={(e) => handleChange(e, "message")} className="my-2 w-full max-w-full rounded-lg p-2 outline-none bg-black/20 text-on-surface border border-white/10 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder-white/30 min-h-[44px] shrink-0" />
 
                         <div className="h-[1px] w-full bg-white/10 my-2" />
 
@@ -268,7 +268,7 @@ const Transactions = () => {
                                     2xl:max-w-[500px]
                                     sm:min-w-[270px]
                                     sm:max-w-[300px]
-                                    min-w-full
+                                    min-w-0 w-full max-w-full
                                     flex-col p-4 rounded-xl border border-white/10 hover:shadow-2xl transition-all"
                                 >
                                     <div className="flex flex-col items-center w-full mt-3">

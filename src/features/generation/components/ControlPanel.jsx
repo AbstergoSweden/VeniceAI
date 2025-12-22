@@ -49,7 +49,7 @@ const ControlPanel = ({
         <Motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="lg:w-1/3 space-y-6"
+            className="w-full space-y-6"
         >
             <div className="bg-surface/30 backdrop-blur-xl border border-white/5 p-6 rounded-2xl shadow-xl">
                 <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 text-on-surface">
@@ -138,8 +138,8 @@ const ControlPanel = ({
                             type="submit"
                             disabled={generating}
                             className={`w-full py-4 px-4 rounded-xl font-bold text-white shadow-lg transition-all duration-300 flex justify-center items-center gap-2 ${generating
-                                    ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-primary via-purple-500 to-tertiary shadow-primary/25'
+                                ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'
+                                : 'bg-gradient-to-r from-primary via-purple-500 to-tertiary shadow-primary/25'
                                 }`}
                         >
                             {generating ? (

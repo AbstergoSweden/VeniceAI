@@ -1,7 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, query, onSnapshot, writeBatch, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, onSnapshot, writeBatch, getDocs, orderBy, limit as firestoreLimit } from 'firebase/firestore';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { apiCall } from './utils/api';
@@ -20,24 +20,63 @@ import DescribeModal from './features/generation/components/DescribeModal';
 import EnhanceModal from './features/generation/components/EnhanceModal';
 import ControlPanel from './features/generation/components/ControlPanel';
 import ImageGallery from './features/generation/components/ImageGallery';
+import ErrorFallback from './components/ui/ErrorFallback';
+import OfflineIndicator from './components/ui/OfflineIndicator';
 
 
+/**
+ * ErrorBoundary component to catch React errors and show fallback UI.
+ * Logs errors in development and production for debugging.
+ */
 export class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { hasError: false };
+        this.state = {
+            hasError: false,
+            error: null,
+            errorInfo: null
+        };
     }
-    // eslint-disable-next-line no-unused-vars
+
     static getDerivedStateFromError(error) {
-        return { hasError: true };
+        return { hasError: true, error };
     }
+
     componentDidCatch(error, errorInfo) {
-        console.error('ErrorBoundary caught an error', error, errorInfo);
+        // Log error details
+        console.error('[ErrorBoundary] Caught error:', error);
+        console.error('[ErrorBoundary] Error info:', errorInfo);
+
+        // Store error info for display
+        this.setState({
+            errorInfo
+        });
+
+        // In production, you could send this to an error reporting service
+        if (!import.meta.env.DEV) {
+            // Example: Sentry.captureException(error, { extra: errorInfo });
+        }
     }
+
+    resetError = () => {
+        this.setState({
+            hasError: false,
+            error: null,
+            errorInfo: null
+        });
+    };
+
     render() {
         if (this.state.hasError) {
-            return <div role="alert">Something went wrong.</div>;
+            return (
+                <ErrorFallback
+                    error={this.state.error}
+                    errorInfo={this.state.errorInfo}
+                    resetError={this.resetError}
+                />
+            );
         }
+
         return this.props.children;
     }
 }
@@ -112,6 +151,8 @@ const AppContent = () => {
     // --- STATE ---
     const [user, setUser] = useState(null);
     const [history, setHistory] = useState([]);
+    const [historyLimit, setHistoryLimit] = useState(50); // Pagination: initial limit
+    const [hasMoreHistory, setHasMoreHistory] = useState(true);
 
     // Form State
     const [prompt, setPrompt] = useState('');
@@ -273,7 +314,7 @@ const AppContent = () => {
         syncModels();
     }, []);
 
-    // 3. Firestore Listener
+    // 3. Firestore Listener with Pagination
     useEffect(() => {
         if (!user) return;
         if (user.offline || !navigator.onLine) {
@@ -284,12 +325,19 @@ const AppContent = () => {
         const collectionPath = `artifacts/${appId}/users/${user.uid}/${CONFIG.COLLECTION_NAME}`;
 
         try {
-            const q = query(collection(db, ...collectionPath.split('/')));
+            // Query with limit for pagination
+            const q = query(
+                collection(db, ...collectionPath.split('/')),
+                orderBy('params.timestamp', 'desc'),
+                firestoreLimit(historyLimit)
+            );
 
             const unsubscribe = onSnapshot(q, (snapshot) => {
                 const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                items.sort((a, b) => (b.params?.timestamp || 0) - (a.params?.timestamp || 0));
                 setHistory(items);
+
+                // Check if there might be more items
+                setHasMoreHistory(items.length === historyLimit);
             }, (err) => {
                 console.warn("Firestore access denied or error:", err);
                 showToast("Could not sync history from cloud. Using local storage only.", 'warning');
@@ -301,7 +349,7 @@ const AppContent = () => {
             showToast("Firestore unavailable. History will be stored locally.", 'warning');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [user, historyLimit]);
 
     // --- LOGIC ---
 
@@ -355,8 +403,16 @@ const AppContent = () => {
         document.body.removeChild(link);
     };
 
+    const loadMoreHistory = () => {
+        setHistoryLimit(prev => prev + 50);
+        showToast(`Loading ${historyLimit + 50} total images...`, 'info');
+    };
+
     return (
         <div className="min-h-screen bg-surface-dim text-on-surface font-sans selection:bg-primary selection:text-white">
+            {/* Offline Indicator */}
+            <OfflineIndicator />
+
             <div className="fixed inset-0 bg-gradient-to-br from-surface-dim via-surface to-surface-dim pointer-events-none -z-10" />
             <div className="fixed inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none -z-10" />
 
@@ -375,7 +431,7 @@ const AppContent = () => {
                             transition={{ type: "spring", stiffness: 300 }}
                             src="https://preview.redd.it/73z6v668xffc1.jpeg?width=1055&format=pjpg&auto=webp&s=b15ae1f6d53d93bf004d8bbff24d5135026bbd2d"
                             alt="Venice.ai Logo"
-                            className="relative w-24 h-24 rounded-3xl object-cover shadow-2xl border-2 border-white/10"
+                            className="relative w-24 h-24 max-w-[96px] rounded-3xl object-cover shadow-2xl border-2 border-white/10"
                         />
                     </div>
                     <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-300 to-tertiary tracking-tight text-center">
@@ -387,52 +443,54 @@ const AppContent = () => {
                 </Motion.header>
 
                 {/* Main Content Area */}
-                <div className="flex flex-col lg:flex-row gap-8 mb-12">
+                <div className="flex flex-wrap gap-8 mb-12 w-full max-w-full lg:flex-nowrap">
                     {/* Left: Controls */}
-                    <ControlPanel
-                        prompt={prompt}
-                        onPromptChange={setPrompt}
-                        negativePrompt={negativePrompt}
-                        onNegativePromptChange={setNegativePrompt}
-                        promptLoading={promptLoading}
-                        onSuggest={handleSuggest}
-                        onEnhance={handleEnhancePrompt}
-                        onDescribe={() => setDescribeModalOpen(true)}
-                        selectedModel={selectedModel}
-                        onModelChange={setSelectedModel}
-                        modelsList={modelsList}
-                        selectedStyle={selectedStyle}
-                        onStyleChange={setSelectedStyle}
-                        stylesList={stylesList}
-                        steps={steps}
-                        onStepsChange={setSteps}
-                        variants={variants}
-                        onVariantsChange={setVariants}
-                        aspectRatio={aspectRatio}
-                        onAspectRatioChange={setAspectRatio}
-                        hideWatermark={hideWatermark}
-                        onWatermarkChange={setHideWatermark}
-                        safeMode={safeMode}
-                        onSafeModeChange={setSafeMode}
-                        generating={generating}
-                        onGenerate={handleGenerate}
-                        onClearHistory={clearHistory}
-                        onClearCache={() => {
-                            imageCache.cleanup(true);
-                            showToast('Image cache cleared', 'info');
-                        }}
-                        onShowCacheStats={() => {
-                            const stats = imageCache.getStats();
-                            showToast(`Cache: ${stats.count} items, ${stats.size}`, 'info');
-                        }}
-                    />
+                    <div className="w-full lg:w-80 xl:w-96 flex-none">
+                        <ControlPanel
+                            prompt={prompt}
+                            onPromptChange={setPrompt}
+                            negativePrompt={negativePrompt}
+                            onNegativePromptChange={setNegativePrompt}
+                            promptLoading={promptLoading}
+                            onSuggest={handleSuggest}
+                            onEnhance={handleEnhancePrompt}
+                            onDescribe={() => setDescribeModalOpen(true)}
+                            selectedModel={selectedModel}
+                            onModelChange={setSelectedModel}
+                            modelsList={modelsList}
+                            selectedStyle={selectedStyle}
+                            onStyleChange={setSelectedStyle}
+                            stylesList={stylesList}
+                            steps={steps}
+                            onStepsChange={setSteps}
+                            variants={variants}
+                            onVariantsChange={setVariants}
+                            aspectRatio={aspectRatio}
+                            onAspectRatioChange={setAspectRatio}
+                            hideWatermark={hideWatermark}
+                            onWatermarkChange={setHideWatermark}
+                            safeMode={safeMode}
+                            onSafeModeChange={setSafeMode}
+                            generating={generating}
+                            onGenerate={handleGenerate}
+                            onClearHistory={clearHistory}
+                            onClearCache={() => {
+                                imageCache.cleanup(true);
+                                showToast('Image cache cleared', 'info');
+                            }}
+                            onShowCacheStats={() => {
+                                const stats = imageCache.getStats();
+                                showToast(`Cache: ${stats.count} items, ${stats.size}`, 'info');
+                            }}
+                        />
+                    </div>
 
                     {/* Right: Gallery */}
                     <Motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="lg:w-2/3 flex flex-col gap-6"
+                        className="flex-1 min-w-0 flex flex-col gap-6"
                     >
                         <div className="bg-surface/30 backdrop-blur-xl border border-white/5 rounded-2xl p-6 min-h-[600px] shadow-xl relative overflow-hidden">
                             {/* Status Overlay */}
@@ -465,6 +523,8 @@ const AppContent = () => {
                                 isGenerating={generating}
                                 onDownload={downloadImage}
                                 onEnhance={handleOpenEnhance}
+                                onLoadMore={loadMoreHistory}
+                                hasMore={hasMoreHistory}
                             />
                         </div>
                     </Motion.div>
