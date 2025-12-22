@@ -138,8 +138,8 @@ const ControlPanel = ({
                             type="submit"
                             disabled={generating}
                             className={`w-full py-4 px-4 rounded-xl font-bold text-white shadow-lg transition-all duration-300 flex justify-center items-center gap-2 ${generating
-                                ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'
-                                : 'bg-gradient-to-r from-primary via-purple-500 to-tertiary shadow-primary/25'
+                                    ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-primary via-purple-500 to-tertiary shadow-primary/25'
                                 }`}
                         >
                             {generating ? (

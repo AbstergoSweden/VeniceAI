@@ -54,7 +54,7 @@ const GenerationSliders = ({
                     aria-valuenow={variants}
                     aria-valuetext={`${variants} variant${variants !== 1 ? 's' : ''}`}
                 />
-                <div className="flex justify-between text-[10px] text-white/20 mt-1">
+                 <div className="flex justify-between text-[10px] text-white/20 mt-1">
                     <span>1</span>
                     <span>4</span>
                 </div>
