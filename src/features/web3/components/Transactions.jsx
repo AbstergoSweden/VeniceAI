@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { BrowserProvider, Contract, formatEther, parseEther, isAddress } from "ethers";
+import { BrowserProvider, Contract, formatEther, parseEther } from "ethers";
 import { contractABI, contractAddress, shortenAddress } from "../../../utils/constants";
+import { validateEthAddress } from "../../../utils/validation";
 import { Loader2 } from "lucide-react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import Toast from "../../../components/ui/Toast";
@@ -108,8 +109,8 @@ const Transactions = () => {
             }
 
             // Validate Ethereum address
-            if (!isAddress(addressTo)) {
-                setToast({ message: "Invalid Ethereum address.", type: "error" });
+            if (!validateEthAddress(addressTo)) {
+                setToast({ message: "Invalid Ethereum address. Please check the address format.", type: "error" });
                 return;
             }
 

@@ -1,4 +1,6 @@
 import imageCache from './cache.js';
+import { validateImageParams } from './validation.js';
+import { checkRateLimit, RateLimitError } from './rateLimiter.js';
 
 /**
  * Makes an API call with automatic key rotation, retries, and caching.
@@ -12,6 +14,29 @@ import imageCache from './cache.js';
  * @throws {Error} If all API keys fail or a non-retriable error occurs.
  */
 export const apiCall = async (url, data, config, initialKeyIndex = 0, isBinary = false) => {
+    // Validate and sanitize image generation parameters
+    if (url.includes('/image/generate') && data) {
+        try {
+            data = validateImageParams(data);
+        } catch (validationError) {
+            if (import.meta.env.DEV) {
+                console.error('Validation failed:', validationError.message);
+            }
+            throw validationError;
+        }
+    }
+
+    // Check client-side rate limit
+    const rateLimitStatus = checkRateLimit(url);
+    if (!rateLimitStatus.allowed) {
+        throw new RateLimitError(rateLimitStatus.retryAfter, rateLimitStatus.remaining);
+    }
+
+    // Log remaining rate limit in dev mode
+    if (import.meta.env.DEV && rateLimitStatus.remaining < 5) {
+        console.warn(`[Rate Limit] ${rateLimitStatus.remaining} requests remaining`);
+    }
+
     // Check if this is an image generation request and if we have it cached
     if (url.includes('/image/generate') && data) {
         const cachedImage = imageCache.getCached(data);

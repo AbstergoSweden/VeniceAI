@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, query, onSnapshot, writeBatch, getDocs } from 'firebase/firestore';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { apiCall } from './utils/api';
 
@@ -83,6 +84,25 @@ try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
+
+    // Initialize App Check for production
+    if (!import.meta.env.DEV) {
+        try {
+            initializeAppCheck(app, {
+                provider: new ReCaptchaV3Provider(firebaseConfig.recaptchaSiteKey || 'DEFAULT_SITE_KEY'),
+                isTokenAutoRefreshEnabled: true
+            });
+            console.log('[Security] App Check initialized');
+        } catch (appCheckError) {
+            console.warn('[Security] App Check initialization failed:', appCheckError);
+        }
+    } else {
+        // In development, use debug token
+        if (typeof self !== 'undefined') {
+            self.FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN || true;
+        }
+        console.log('[Security] Running in development mode - App Check debug mode enabled');
+    }
 } catch (e) {
     console.error("Firebase initialization failed:", e);
     throw e;
@@ -452,13 +472,13 @@ const AppContent = () => {
 
                 {/* Chat Panel Section */}
                 <div className="mb-12">
-                     <Suspense fallback={
+                    <Suspense fallback={
                         <div className="h-[600px] bg-surface/30 rounded-2xl flex items-center justify-center border border-white/5">
                             <LoadingComponent message="Loading chat interface..." />
                         </div>
                     }>
                         <div className="h-[700px]">
-                             <ChatPanel
+                            <ChatPanel
                                 chatHistory={chatHistory}
                                 setChatHistory={setChatHistory}
                                 systemPrompt={systemPrompt}
