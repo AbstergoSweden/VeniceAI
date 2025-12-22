@@ -8,102 +8,104 @@
 
 /* --- DESIGN TOKENS (CSS Custom Properties) --- */
 :root {
-    /* === TYPOGRAPHY === */
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* === VENETIAN DARK - PREMIUM AESTHETIC === */
 
-    /* === DARK PASTEL COLOR SCHEME === */
+    /* Primary - Electric Violet */
+    --md-sys-color-primary: #D0BCFF;
+    --md-sys-color-on-primary: #381E72;
+    --md-sys-color-primary-container: #4F378B;
+    --md-sys-color-on-primary-container: #EADDFF;
 
-    /* Primary - Soft Lavender */
-    --md-sys-color-primary: #B8A9E8;
-    --md-sys-color-on-primary: #1E1A2E;
-    --md-sys-color-primary-container: #3D3560;
-    --md-sys-color-on-primary-container: #E4DCFF;
+    /* Secondary - Vibrant Cyan */
+    --md-sys-color-secondary: #CCC2DC;
+    --md-sys-color-on-secondary: #332D41;
+    --md-sys-color-secondary-container: #4A4458;
+    --md-sys-color-on-secondary-container: #E8DEF8;
 
-    /* Secondary - Muted Teal */
-    --md-sys-color-secondary: #7DCFCF;
-    --md-sys-color-on-secondary: #003737;
-    --md-sys-color-secondary-container: #1A4545;
-    --md-sys-color-on-secondary-container: #A8F0F0;
+    /* Tertiary - Rich Gold/Pink */
+    --md-sys-color-tertiary: #EFB8C8;
+    --md-sys-color-on-tertiary: #492532;
+    --md-sys-color-tertiary-container: #633B48;
+    --md-sys-color-on-tertiary-container: #FFD8E4;
 
-    /* Tertiary - Soft Coral */
-    --md-sys-color-tertiary: #E8A9C4;
-    --md-sys-color-on-tertiary: #3E1A2A;
-    --md-sys-color-tertiary-container: #5C3347;
-    --md-sys-color-on-tertiary-container: #FFD8E8;
+    /* Error - Intense Red */
+    --md-sys-color-error: #F2B8B5;
+    --md-sys-color-on-error: #601410;
+    --md-sys-color-error-container: #8C1D18;
+    --md-sys-color-on-error-container: #F9DEDC;
 
-    /* Error - Pastel Rose */
-    --md-sys-color-error: #FFB4AB;
-    --md-sys-color-on-error: #690005;
-    --md-sys-color-error-container: #4A2024;
-    --md-sys-color-on-error-container: #FFDAD6;
+    /* Surfaces - Deep Void */
+    --md-sys-color-surface-dim: #09090B;
+    /* Almost black */
+    --md-sys-color-surface: #0E0E11;
+    /* Very dark grey */
+    --md-sys-color-surface-bright: #18181B;
+    --md-sys-color-surface-container-lowest: #050507;
+    --md-sys-color-surface-container-low: #121215;
+    --md-sys-color-surface-container: #1A1A1E;
+    --md-sys-color-surface-container-high: #27272A;
+    --md-sys-color-surface-container-highest: #3F3F46;
 
-    /* Surfaces - Deep Charcoal with Tints */
-    --md-sys-color-surface-dim: #0D0D12;
-    --md-sys-color-surface: #121218;
-    --md-sys-color-surface-bright: #1A1A22;
-    --md-sys-color-surface-container-lowest: #0A0A0F;
-    --md-sys-color-surface-container-low: #14141C;
-    --md-sys-color-surface-container: #1C1C26;
-    --md-sys-color-surface-container-high: #242430;
-    --md-sys-color-surface-container-highest: #2E2E3C;
-
-    /* On Surface Colors */
-    --md-sys-color-on-surface: #E6E1E9;
-    --md-sys-color-on-surface-variant: #A9A4B0;
+    /* On Surface Colors - Crisp White */
+    --md-sys-color-on-surface: #FAFAFA;
+    --md-sys-color-on-surface-variant: #D4D4D8;
 
     /* Outline Colors */
-    --md-sys-color-outline: #6B6678;
-    --md-sys-color-outline-variant: #44404D;
+    --md-sys-color-outline: #A1A1AA;
+    --md-sys-color-outline-variant: #52525B;
 
     /* Inverse Colors */
-    --md-sys-color-inverse-surface: #E6E1E9;
-    --md-sys-color-inverse-on-surface: #1C1B1F;
+    --md-sys-color-inverse-surface: #E4E4E7;
+    --md-sys-color-inverse-on-surface: #18181B;
     --md-sys-color-inverse-primary: #6750A4;
 
     /* Scrim */
-    --md-sys-color-scrim: rgba(0, 0, 0, 0.6);
+    --md-sys-color-scrim: rgba(0, 0, 0, 0.8);
 
-    /* Success - Pastel Mint */
-    --md-sys-color-success: #A8E8C4;
-    --md-sys-color-on-success: #003822;
-    --md-sys-color-success-container: #1A4532;
-    --md-sys-color-on-success-container: #C8FFE4;
+    /* Success - Neon Mint */
+    --md-sys-color-success: #86EFAC;
+    --md-sys-color-on-success: #022C22;
+    --md-sys-color-success-container: #064E3B;
+    --md-sys-color-on-success-container: #D1FAE5;
 
-    /* Warning - Pastel Amber */
-    --md-sys-color-warning: #E8D4A8;
-    --md-sys-color-on-warning: #3A2E10;
-    --md-sys-color-warning-container: #4D4020;
-    --md-sys-color-on-warning-container: #FFF0C8;
+    /* Warning - Neon Amber */
+    --md-sys-color-warning: #FDE047;
+    --md-sys-color-on-warning: #422006;
+    --md-sys-color-warning-container: #713F12;
+    --md-sys-color-on-warning-container: #FEF9C3;
 
-    /* Info - Pastel Sky */
-    --md-sys-color-info: #A8D4E8;
-    --md-sys-color-on-info: #0A3040;
-    --md-sys-color-info-container: #1A4050;
-    --md-sys-color-on-info-container: #C8F0FF;
+    /* Info - Neon Sky */
+    --md-sys-color-info: #7DD3FC;
+    --md-sys-color-on-info: #082F49;
+    --md-sys-color-info-container: #0C4A6E;
+    --md-sys-color-on-info-container: #E0F2FE;
 
-    /* === ELEVATION (Surface Tint Overlay) === */
-    --md-sys-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
-    --md-sys-elevation-2: 0 3px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
-    --md-sys-elevation-3: 0 6px 12px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3);
-    --md-sys-elevation-4: 0 8px 16px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3);
-    --md-sys-elevation-5: 0 12px 24px rgba(0, 0, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.3);
+    /* === ELEVATION (Deep Shadows) === */
+    --md-sys-elevation-1: 0 4px 6px -1px rgba(0, 0, 0, 0.5),
+        0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --md-sys-elevation-2: 0 10px 15px -3px rgba(0, 0, 0, 0.5),
+        0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --md-sys-elevation-3: 0 20px 25px -5px rgba(0, 0, 0, 0.5),
+        0 10px 10px -5px rgba(0, 0, 0, 0.3);
+    --md-sys-elevation-4: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    --md-sys-elevation-5: 0 35px 60px -15px rgba(0, 0, 0, 0.7);
 
-    /* === SHAPE (Corner Radii) - M3 Expressive === */
+    /* === SHAPE (Sleeker Corners) === */
     --md-sys-shape-corner-none: 0;
-    --md-sys-shape-corner-extra-small: 4px;
-    --md-sys-shape-corner-small: 8px;
-    --md-sys-shape-corner-medium: 12px;
-    --md-sys-shape-corner-large: 16px;
-    --md-sys-shape-corner-extra-large: 24px;
+    --md-sys-shape-corner-extra-small: 2px;
+    --md-sys-shape-corner-small: 6px;
+    --md-sys-shape-corner-medium: 8px;
+    --md-sys-shape-corner-large: 12px;
+    --md-sys-shape-corner-extra-large: 16px;
     --md-sys-shape-corner-full: 9999px;
 
-    /* === MOTION (Spring-based) === */
+    /* === MOTION (Snappier) === */
     --md-sys-motion-duration-short: 150ms;
-    --md-sys-motion-duration-medium: 250ms;
-    --md-sys-motion-duration-long: 400ms;
-    --md-sys-motion-duration-extra-long: 550ms;
-    --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
-    --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --md-sys-motion-duration-medium: 200ms;
+    --md-sys-motion-duration-long: 300ms;
+    --md-sys-motion-duration-extra-long: 400ms;
+    --md-sys-motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --md-sys-motion-easing-emphasized: cubic-bezier(0.4, 0, 0.2, 1);
     --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
     --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
     --md-sys-motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -171,15 +173,17 @@ body {
     }
 
     /* === GLASSMORPHISM CARD === */
+    /* === GLASSMORPHISM CARD === */
     .m3-glass {
-        background: linear-gradient(135deg,
-                rgba(184, 169, 232, 0.08) 0%,
-                rgba(125, 207, 207, 0.05) 50%,
-                rgba(232, 169, 196, 0.08) 100%);
-        -webkit-backdrop-filter: blur(20px);
-        backdrop-filter: blur(20px);
+        background: linear-gradient(145deg,
+                rgba(25, 25, 30, 0.6) 0%,
+                rgba(20, 20, 25, 0.4) 100%);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: var(--md-sys-shape-corner-extra-large);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: var(--md-sys-shape-corner-large);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
     /* === M3 FILLED BUTTON === */

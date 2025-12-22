@@ -413,8 +413,10 @@ const AppContent = () => {
             {/* Offline Indicator */}
             <OfflineIndicator />
 
-            <div className="fixed inset-0 bg-gradient-to-br from-surface-dim via-surface to-surface-dim pointer-events-none -z-10" />
-            <div className="fixed inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none -z-10" />
+            {/* Background Effects */}
+            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-container/40 via-surface-dim to-surface-dim pointer-events-none -z-20" />
+            <div className="fixed inset-0 bg-[url('/grid.svg')] opacity-20 pointer-events-none -z-10 mix-blend-overlay" />
+            <div className="fixed inset-0 bg-gradient-to-t from-surface-dim via-transparent to-transparent pointer-events-none -z-10" />
 
             <div className="container mx-auto p-4 lg:p-8 max-w-[1600px]">
                 {/* Header */}
