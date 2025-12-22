@@ -58,7 +58,7 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 | **Code Quality** | ESLint 9, Prettier |
 
 ---
-
+```
 ## Project Tree
 
 .
@@ -103,7 +103,7 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 ├── tailwind.config.js
 ├── vite.config.js
 └── vitest.config.js
-
+```
 ---
 
 ## Configuration
