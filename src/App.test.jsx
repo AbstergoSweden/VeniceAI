@@ -304,8 +304,7 @@ describe('App Component - Comprehensive Tests', () => {
         render(
             <App />
         );
-        // Find the describe image button
-        const describeImageBtn = screen.getByLabelText(/Describe an uploaded image/i);
+        const describeImageBtn = screen.getByTitle('Describe an uploaded image');
         expect(describeImageBtn).toBeInTheDocument();
     });
 
