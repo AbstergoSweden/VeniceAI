@@ -1,100 +1,108 @@
 ---
 meta:
-  last_updated: "2024-12-17"
-  source: "Venice.ai Public Documentation & API Swagger"
-  status: "Verified"
+  last_updated: "2025-12-23"
+  source: "Official Venice.ai Documentation (docs.venice.ai), Privacy Pages, Blog Updates, Swagger Spec"
+  status: "Fully Updated & Verified"
+  swagger_url: "https://api.venice.ai/doc/api/swagger.yaml"
+  notes: "Models subject to ongoing curation; check /models endpoint for live list."
 
 api_configuration:
   base_url: "https://api.venice.ai/api/v1"
-  dashboard_url: "https://venice.ai/home"
+  dashboard_url: "https://venice.ai/settings/api"
   documentation_url: "https://docs.venice.ai"
   authentication:
     type: "Bearer"
     header: "Authorization"
     format: "Bearer <VENICE_API_KEY>"
+    notes: "OpenAI-compatible SDK setup supported."
 
 privacy_architecture:
-  storage_policy: "No data retention on servers. Requests are proxied to decentralized GPUs and responses are streamed back."
-  logging: "Minimal metadata only (IP, Timezone) for non-account users. No prompt/completion logging."
-  encryption: "SSL/TLS for transport. Local browser storage recommended for client-side history."
+  storage_policy: "No prompt/response retention on servers. Requests proxied transiently to decentralized GPUs; responses streamed directly."
+  logging: "Event metadata only (e.g., sign-ins, chat creation). No content logging. Local browser/device storage for history."
+  encryption: "SSL/TLS in transit. Conversation history encrypted locally."
+  additional: "GPU providers see raw prompts momentarily but without persistent storage or identifiable ties."
 
 endpoints:
   chat_completions:
     path: "/chat/completions"
     method: "POST"
-    compatibility: "OpenAI API Compatible"
+    compatibility: "Full OpenAI API Compatible (including streaming, tools, vision)"
     special_parameters:
       venice_parameters:
         type: "object"
         properties:
           include_venice_system_prompt:
             type: "boolean"
-            description: "If false, disables the default system prompt."
+            default: true
           enable_web_search:
             type: "string"
-            enum: ["on", "off", "auto"]
-            description: "Enables RAG via web search."
+            enum: ["off", "on", "auto"]
           enable_web_scraping:
+            type: "boolean"
+          enable_web_citations:
             type: "boolean"
           strip_thinking_response:
             type: "boolean"
-            description: "Hides <think> tags from reasoning models."
-  
+          disable_thinking:
+            type: "boolean"
+          character_slug:
+            type: "string"
+            description: "Use predefined AI character."
   models:
     path: "/models"
     method: "GET"
-    description: "Lists available models."
-
+    description: "Lists all available models with constraints and capabilities."
   image_generation:
     path: "/image/generate"
     method: "POST"
-    description: "Generate images using Venice models."
     parameters:
       model: "string (required)"
       prompt: "string (required)"
       negative_prompt: "string"
-      style_preset: "string (e.g., '3D Model', 'Cinematic', 'Anime')"
-      height: "integer (default: 1024)"
-      width: "integer (default: 1024)"
+      style_preset: "string"
+      height: "integer"
+      width: "integer"
       steps: "integer"
       cfg_scale: "number"
-      safe_mode: "boolean (default: true)"
-      return_binary: "boolean"
+      num_images: "integer (1-4)"
+      safe_mode: "boolean (blurs adult content if enabled)"
       hide_watermark: "boolean"
+      return_binary: "boolean"
 
 model_catalog:
   text_inference:
-    - id: "venice-uncensored"
-      context_window: "33k"
-      type: "General Purpose"
-    - id: "llama-3.3-70b"
-      context_window: "131k"
-      type: "High Intelligence"
-    - id: "qwen3-235b"
-      context_window: "131k"
-      type: "Reasoning/Coding"
-    - id: "deepseek-r1-671b"
-      context_window: "131k"
-      type: "Advanced Reasoning"
-    - id: "mistral-31-24b"
-      context_window: "131k"
-      type: "Vision/Text"
-  
+    curated:
+      - id: "venice-uncensored"
+        description: "Default uncensored general-purpose model (32k-131k context)."
+      - id: "qwen3-235b-a22b-thinking-2507"
+        description: "Advanced reasoning with visible thinking steps."
+      - id: "qwen3-235b-a22b-instruct-2507"
+        description: "Non-thinking high-intelligence variant."
+      - id: "mistral-31-24b"
+        description: "Vision-capable text/multimodal."
+      - id: "qwen3-4b"
+        description: "Fast lightweight reasoning."
+    notes: "Legacy models rerouted; use /models for current IDs."
   image_generation:
-    - id: "venice-sd35"
-      description: "Stable Diffusion 3.5"
-    - id: "fluently-xl"
-    - id: "lustify-sdxl"
-      description: "Uncensored Art"
-    - id: "qwen-image"
-    - id: "z-image-turbo"
+    curated:
+      - id: "nano-banana-pro"
+        description: "Photorealism, product shots, light upscaling."
+      - id: "fluently-xl"
+        description: "High-quality general image generation."
+      - id: "lustify-sdxl"
+        description: "Uncensored artistic focus."
 
 limits_and_pricing:
-  tier_structure:
-    explorer: "Free, lower rate limits."
-    pro: "Paid, higher limits, access to premium models."
+  tiers:
+    free:
+      description: "Daily limits on text/images; basic access."
+    pro:
+      description: "Unlimited text, higher image limits, watermark removal, advanced models, one-time $10 API credit."
+      cost: "Monthly/annual subscription (check current pricing)."
+  api_access:
+    methods:
+      - "Pro trial credits"
+      - "Pay-as-you-go USD deposits"
+      - "DIEM staking (via VVV token) for renewable daily allocation"
   rate_limits:
-    headers:
-      - "x-ratelimit-limit-requests"
-      - "x-ratelimit-remaining-requests"
-      - "x-ratelimit-reset-requests"
+    description: "Returned in headers (x-ratelimit-*); dynamic by tier/balance."
