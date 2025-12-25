@@ -73,7 +73,7 @@ export const useUpscale = ({
                     const newBase64 = reader.result.split(',')[1];
                     const compressed = await compressImage(newBase64);
 
-                    // Validate Firestore document ID before attempting update
+                    // Bug #5 Fix: Validate Firestore document ID before attempting update
                     if (!target.id || target.id.startsWith('mock-') || target.id.startsWith('offline-')) {
                         showToast('Cannot enhance offline/mock images. Please generate online first.', 'error');
                         setUpscaling(false);
