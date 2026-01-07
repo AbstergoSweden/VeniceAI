@@ -689,6 +689,9 @@ export function assess(prompt: string): Decision {
         fuzzyMatches,
         normalized,
     };
+    fuzzyMatches: [],  // Will be populated in Phase 2
+        normalized,
+    };
 
 // Calculate severity and context score
 signals.severity = determineSeverity(hardTerms, ambiguousYouth);

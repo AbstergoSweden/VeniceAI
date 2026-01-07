@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Content Guard Configuration",
+    "description": "Configuration for the VeniceAI content safety guard",
+    "thresholds": {
+        "contextScoreThreshold": 10,
+        "clusterMatchThreshold": 2,
+        "hammingDistanceThreshold": 5,
+        "soundexMinLength": 4,
+        "jaccardThreshold": 0.75
+    },
+    "rateLimiting": {
+        "maxRequestsPerUser": 100,
+        "windowSeconds": 60
+    },
+    "features": {
+        "enableFuzzyMatching": true,
+        "enableClustering": true,
+        "enableCrossSentence": true,
+        "enableInjectionDetection": true
+    },
+    "comments": {
+        "contextScoreThreshold": "Weighted risk score above this value triggers block (default: 10)",
+        "clusterMatchThreshold": "Minimum terms needed from each cluster set to trigger (default: 2)",
+        "hammingDistanceThreshold": "Max bit difference for simhash matches (default: 5, range: 0-64)",
+        "soundexMinLength": "Minimum word length for soundex matching (default: 4)",
+        "jaccardThreshold": "Minimum similarity for Jaccard matches (default: 0.75, range: 0-1)"
+    }
+}
