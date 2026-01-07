@@ -289,6 +289,7 @@ body {
         outline: none;
         border-color: var(--md-sys-color-primary);
         border-width: 2px;
+        /* Compensate for border width increase from 1px to 2px to prevent layout shift */
         padding: calc(0.75rem - 1px) calc(1rem - 1px);
     }
 
