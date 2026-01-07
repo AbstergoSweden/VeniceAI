@@ -3,80 +3,80 @@
 @tailwind utilities;
 
 /* ============================================
-   ANDROID 16 MATERIAL YOU - MINIMAL DARK
+   DRACULA-INSPIRED MINIMAL DARK THEME
    ============================================ */
 
 /* --- DESIGN TOKENS (CSS Custom Properties) --- */
 :root {
-    /* === MATERIAL YOU - SOFT DARK === */
+    /* === DRACULA-INSPIRED - LIGHTER HUE DARK === */
 
-    /* Primary - Soft Indigo */
-    --md-sys-color-primary: #A8C7FA;
-    --md-sys-color-on-primary: #0B1F3B;
-    --md-sys-color-primary-container: #1E2F4F;
-    --md-sys-color-on-primary-container: #D7E3FF;
+    /* Primary - Dracula Purple (Lighter) */
+    --md-sys-color-primary: #C397F0;
+    --md-sys-color-on-primary: #2B1348;
+    --md-sys-color-primary-container: #3D2260;
+    --md-sys-color-on-primary-container: #E8D6FF;
 
-    /* Secondary - Muted Periwinkle */
-    --md-sys-color-secondary: #C4C7D0;
-    --md-sys-color-on-secondary: #1E232B;
-    --md-sys-color-secondary-container: #2C313A;
-    --md-sys-color-on-secondary-container: #DCE0E8;
+    /* Secondary - Dracula Cyan (Lighter) */
+    --md-sys-color-secondary: #8BE9FD;
+    --md-sys-color-on-secondary: #0D3540;
+    --md-sys-color-secondary-container: #1A4A58;
+    --md-sys-color-on-secondary-container: #D0F5FF;
 
-    /* Tertiary - Warm Sand */
-    --md-sys-color-tertiary: #E4C5A8;
-    --md-sys-color-on-tertiary: #2A1F16;
-    --md-sys-color-tertiary-container: #3A2D22;
-    --md-sys-color-on-tertiary-container: #F4DDC8;
+    /* Tertiary - Dracula Green (Lighter) */
+    --md-sys-color-tertiary: #A8F5B4;
+    --md-sys-color-on-tertiary: #0F3617;
+    --md-sys-color-tertiary-container: #1C4A26;
+    --md-sys-color-on-tertiary-container: #D4FFE0;
 
-    /* Error - Soft Rose */
-    --md-sys-color-error: #F2B8B5;
-    --md-sys-color-on-error: #3C0B0A;
-    --md-sys-color-error-container: #5A1A18;
-    --md-sys-color-on-error-container: #F9DEDC;
+    /* Error - Dracula Red (Lighter) */
+    --md-sys-color-error: #FF9999;
+    --md-sys-color-on-error: #4A0D0D;
+    --md-sys-color-error-container: #6B1A1A;
+    --md-sys-color-on-error-container: #FFE0E0;
 
-    /* Surfaces - Calm Charcoal */
-    --md-sys-color-surface-dim: #0B0D11;
-    --md-sys-color-surface: #101319;
-    --md-sys-color-surface-bright: #1A1E25;
-    --md-sys-color-surface-container-lowest: #07090D;
-    --md-sys-color-surface-container-low: #131821;
-    --md-sys-color-surface-container: #1A202B;
-    --md-sys-color-surface-container-high: #212835;
-    --md-sys-color-surface-container-highest: #2B3240;
+    /* Surfaces - Dracula Dark Background */
+    --md-sys-color-surface-dim: #1E1F29;
+    --md-sys-color-surface: #282A36;
+    --md-sys-color-surface-bright: #343746;
+    --md-sys-color-surface-container-lowest: #191A24;
+    --md-sys-color-surface-container-low: #24252F;
+    --md-sys-color-surface-container: #2E3040;
+    --md-sys-color-surface-container-high: #383A4A;
+    --md-sys-color-surface-container-highest: #44475A;
 
     /* On Surface Colors */
-    --md-sys-color-on-surface: #F1F3F6;
-    --md-sys-color-on-surface-variant: #C4CBD6;
+    --md-sys-color-on-surface: #F8F8F2;
+    --md-sys-color-on-surface-variant: #D5D6E3;
 
     /* Outline Colors */
-    --md-sys-color-outline: #8A92A2;
-    --md-sys-color-outline-variant: #3A4250;
+    --md-sys-color-outline: #7B7E9E;
+    --md-sys-color-outline-variant: #44475A;
 
     /* Inverse Colors */
-    --md-sys-color-inverse-surface: #E6E9EE;
-    --md-sys-color-inverse-on-surface: #1B1F28;
-    --md-sys-color-inverse-primary: #4A648B;
+    --md-sys-color-inverse-surface: #F8F8F2;
+    --md-sys-color-inverse-on-surface: #282A36;
+    --md-sys-color-inverse-primary: #7A4FB8;
 
     /* Scrim */
-    --md-sys-color-scrim: rgba(6, 8, 12, 0.6);
+    --md-sys-color-scrim: rgba(40, 42, 54, 0.7);
 
-    /* Success - Muted Mint */
-    --md-sys-color-success: #9AD6B2;
-    --md-sys-color-on-success: #0B2B21;
-    --md-sys-color-success-container: #163B2F;
-    --md-sys-color-on-success-container: #CFEBD8;
+    /* Success - Dracula Green */
+    --md-sys-color-success: #50FA7B;
+    --md-sys-color-on-success: #0A2811;
+    --md-sys-color-success-container: #163A1F;
+    --md-sys-color-on-success-container: #CAFFD8;
 
-    /* Warning - Soft Amber */
-    --md-sys-color-warning: #EAC28C;
-    --md-sys-color-on-warning: #3A240A;
-    --md-sys-color-warning-container: #4A3416;
-    --md-sys-color-on-warning-container: #F5E3C7;
+    /* Warning - Dracula Orange (Lighter) */
+    --md-sys-color-warning: #FFB86C;
+    --md-sys-color-on-warning: #3B240E;
+    --md-sys-color-warning-container: #5A381B;
+    --md-sys-color-on-warning-container: #FFE8D4;
 
-    /* Info - Soft Sky */
-    --md-sys-color-info: #A5C8F0;
-    --md-sys-color-on-info: #0D2438;
-    --md-sys-color-info-container: #1A344A;
-    --md-sys-color-on-info-container: #D6E6F7;
+    /* Info - Dracula Cyan */
+    --md-sys-color-info: #8BE9FD;
+    --md-sys-color-on-info: #0D3540;
+    --md-sys-color-info-container: #1A4A58;
+    --md-sys-color-on-info-container: #D0F5FF;
 
     /* === ELEVATION (Soft Shadows) === */
     --md-sys-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.35),
@@ -86,13 +86,13 @@
     --md-sys-elevation-4: 0 14px 28px rgba(0, 0, 0, 0.45);
     --md-sys-elevation-5: 0 20px 40px rgba(0, 0, 0, 0.5);
 
-    /* === SHAPE (Soft Corners) === */
+    /* === SHAPE (Rounded Corners) === */
     --md-sys-shape-corner-none: 0;
-    --md-sys-shape-corner-extra-small: 2px;
-    --md-sys-shape-corner-small: 6px;
-    --md-sys-shape-corner-medium: 8px;
-    --md-sys-shape-corner-large: 12px;
-    --md-sys-shape-corner-extra-large: 16px;
+    --md-sys-shape-corner-extra-small: 4px;
+    --md-sys-shape-corner-small: 8px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-extra-large: 20px;
     --md-sys-shape-corner-full: 9999px;
 
     /* === MOTION (Subtle) === */
