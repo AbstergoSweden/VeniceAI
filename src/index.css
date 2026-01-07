@@ -111,6 +111,9 @@
     --md-sys-state-focus-opacity: 0.12;
     --md-sys-state-pressed-opacity: 0.12;
     --md-sys-state-dragged-opacity: 0.16;
+
+    /* === COMPONENT SIZES === */
+    --md-sys-textfield-border-width: 1px;
 }
 
 /* === BASE STYLES === */
@@ -286,7 +289,7 @@ body {
         outline: none;
         border-color: var(--md-sys-color-primary);
         border-width: 2px;
-        padding: calc(0.75rem - 1px) calc(1rem - 1px);
+        padding: calc(0.75rem - var(--md-sys-textfield-border-width)) calc(1rem - var(--md-sys-textfield-border-width));
     }
 
     /* === M3 SELECT === */
