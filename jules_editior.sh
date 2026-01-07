@@ -59,7 +59,23 @@ fi
 # 4. Asset Generation (Placeholder for Visual Assets)
 echo "🔵 [JULES] Checking Asset Integrity..."
 mkdir -p src/assets/ui
-# We could generate placeholders here if needed using ImageMagick if installed, but we'll skip for now to keep it safe.
+
+# Check for ImageMagick (convert) and generate placeholders if available
+if command -v convert >/dev/null 2>&1; then
+    echo "🎨 [JULES] ImageMagick detected. Generating placeholder assets..."
+
+    # Generate a simple placeholder image if it doesn't exist
+    if [ ! -f "src/assets/ui/placeholder.png" ]; then
+        # Create a 100x100 gradient image
+        convert -size 100x100 gradient:blue-purple src/assets/ui/placeholder.png
+        echo "✅ [JULES] Created src/assets/ui/placeholder.png"
+    else
+        echo "✅ [JULES] Placeholder assets already exist."
+    fi
+else
+    echo "⚠️ [JULES] ImageMagick (convert) not found. Skipping asset generation."
+    echo "ℹ️  To enable asset generation, please install ImageMagick."
+fi
 
 # 5. Linting & Code Style
 echo "🔵 [JULES] Enforcing Code Style..."
