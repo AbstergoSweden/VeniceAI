@@ -2,8 +2,8 @@
  * contentGuard.test.ts — Comprehensive test suite for content safety guard
  */
 
-import { describe, it, expect } from 'vitest';
-import { normalizeText, assess } from './contentGuard';
+import { describe, it, expect, vi } from 'vitest';
+import { normalizeText, assess, setContentGuardBypass } from './contentGuard';
 
 describe('contentGuard', () => {
     describe('normalizeText', () => {
@@ -47,6 +47,29 @@ describe('contentGuard', () => {
             const input = 'ⓣ3\u200Bｓt';
             const result = normalizeText(input);
             expect(result).toBe('test');
+        });
+    });
+
+    describe('Dev Mode Bypass', () => {
+        it('should allow blocked content when bypass is enabled', () => {
+            // 1. Verify it blocks normally
+            const blockedResult = assess('explicit child content');
+            expect(blockedResult.allow).toBe(false);
+
+            // 2. Enable Bypass
+            setContentGuardBypass(true);
+
+            // 3. Verify it allows now
+            const allowedResult = assess('explicit child content');
+            expect(allowedResult.allow).toBe(true);
+            expect(allowedResult.reason).toContain('DEV MODE');
+
+            // 4. Disable Bypass
+            setContentGuardBypass(false);
+
+            // 5. Verify it blocks again
+            const blockedAgain = assess('explicit child content');
+            expect(blockedAgain.allow).toBe(false);
         });
     });
 

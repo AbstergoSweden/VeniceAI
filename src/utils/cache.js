@@ -209,12 +209,18 @@ export const cleanup = (all = false) => {
     }
   } else {
     // Remove all cache entries
-    for (let i = localStorage.length - 1; i >= 0; i--) {
+    // Safely collect keys first to avoid iteration issues
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith(CACHE_PREFIX)) {
-        localStorage.removeItem(key);
-        removed++;
+        keys.push(key);
       }
+    }
+
+    for (const key of keys) {
+      localStorage.removeItem(key);
+      removed++;
     }
   }
 

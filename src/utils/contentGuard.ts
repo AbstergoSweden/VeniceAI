@@ -641,6 +641,28 @@ function calculateContextScore(signals: Partial<Signals>): number {
 // Main Assessment Function
 // ============================================================================
 
+// ============================================================================
+// Dev Mode Bypass
+// ============================================================================
+// ============================================================================
+// Dev Mode Bypass
+// ============================================================================
+// Initialize from env var (default false)
+const initialBypassState = import.meta.env.VITE_ENABLE_DEV_MODE === 'true';
+let isBypassed = initialBypassState;
+
+if (initialBypassState) {
+    console.warn('[ContentGuard] ⚠️ Dev Mode Bypass ENABLED via environment variable');
+}
+
+export const setContentGuardBypass = (enabled: boolean) => {
+    isBypassed = enabled;
+    console.log(`[ContentGuard] Dev Mode Bypass: ${enabled ? 'ENABLED' : 'DISABLED'}`);
+};
+
+export const getContentGuardBypass = () => isBypassed;
+
+
 /**
  * Assess a prompt for content safety
  * 
@@ -648,6 +670,31 @@ function calculateContextScore(signals: Partial<Signals>): number {
  * @returns Decision object with allow/block action and detailed signals
  */
 export function assess(prompt: string): Decision {
+    // DEV MODE BYPASS
+    if (isBypassed) {
+        return {
+            allow: true,
+            action: 'ALLOW',
+            reason: 'DEV MODE BYPASS ENABLED',
+            normalizedPrompt: prompt,
+            rewrittenPrompt: null,
+            signals: {
+                hardTerms: [],
+                ambiguousYouth: [],
+                adultAssertions: [],
+                ages: [],
+                schoolContext: [],
+                injections: [],
+                crossSentence: [],
+                clusterScore: 0,
+                severity: 'UNKNOWN',
+                contextScore: 0,
+                fuzzyMatches: [],
+                normalized: prompt,
+            }
+        };
+    }
+
     const raw = prompt;
     let normalized = normalizeText(prompt);
     normalized = normalizeAdultTypos(normalized);
@@ -690,120 +737,120 @@ export function assess(prompt: string): Decision {
         normalized,
     };
 
-// Calculate severity and context score
-signals.severity = determineSeverity(hardTerms, ambiguousYouth);
-signals.contextScore = calculateContextScore(signals);
+    // Calculate severity and context score
+    signals.severity = determineSeverity(hardTerms, ambiguousYouth);
+    signals.contextScore = calculateContextScore(signals);
 
-// Decision logic (priority order)
+    // Decision logic (priority order)
 
-// 1) Injection attempts → BLOCK (highest priority to prevent jailbreaking)
-if (injections.length > 0) {
+    // 1) Injection attempts → BLOCK (highest priority to prevent jailbreaking)
+    if (injections.length > 0) {
+        return {
+            allow: false,
+            action: 'BLOCK',
+            reason: `Injection attempt detected: ${injections.join(', ')}`,
+            normalizedPrompt: normalized,
+            rewrittenPrompt: null,
+            signals,
+        };
+    }
+
+    // 2) Any explicit age < 18 → BLOCK
+    if (ages.some(age => age < 18)) {
+        return {
+            allow: false,
+            action: 'BLOCK',
+            reason: `Explicit age under 18 detected (severity: ${signals.severity})`,
+            normalizedPrompt: normalized,
+            rewrittenPrompt: null,
+            signals,
+        };
+    }
+
+    // 3) Any hard term → BLOCK
+    if (hardTerms.length > 0) {
+        return {
+            allow: false,
+            action: 'BLOCK',
+            reason: `Minor-implying term(s): ${hardTerms.join(', ')} (severity: ${signals.severity})`,
+            normalizedPrompt: normalized,
+            rewrittenPrompt: null,
+            signals,
+        };
+    }
+
+    // 4) Cross-sentence detection → BLOCK
+    if (crossSentence.length > 0) {
+        return {
+            allow: false,
+            action: 'BLOCK',
+            reason: `Cross-sentence evasion detected: ${crossSentence.join(', ')} (severity: ${signals.severity})`,
+            normalizedPrompt: normalized,
+            rewrittenPrompt: null,
+            signals,
+        };
+    }
+
+    // 5) Fuzzy matches for obfuscated content → BLOCK
+    if (fuzzyMatches.length > 0) {
+        const topMatch = fuzzyMatches[0];
+        return {
+            allow: false,
+            action: 'BLOCK',
+            reason: `Obfuscated content detected: "${topMatch.window}" matches "${topMatch.term}" (${topMatch.matchType}, confidence: ${topMatch.confidence.toFixed(2)})`,
+            normalizedPrompt: normalized,
+            rewrittenPrompt: null,
+            signals,
+        };
+    }
+
+    // 6) K-12 contexts → BLOCK
+    if (schoolContext.length > 0) {
+        return {
+            allow: false,
+            action: 'BLOCK',
+            reason: `K-12 school context implies minor (severity: ${signals.severity})`,
+            normalizedPrompt: normalized,
+            rewrittenPrompt: null,
+            signals,
+        };
+    }
+
+    // 7) Ambiguous youth descriptors: BLOCK regardless (strict policy)
+    if (ambiguousYouth.length > 0) {
+        return {
+            allow: false,
+            action: 'BLOCK',
+            reason: `Ambiguous youth descriptor present (severity: ${signals.severity})`,
+            normalizedPrompt: normalized,
+            rewrittenPrompt: null,
+            signals,
+        };
+    }
+
+    // 8) Context score threshold check
+    if (signals.contextScore >= CONTEXT_SCORE_THRESHOLD) {
+        return {
+            allow: false,
+            action: 'BLOCK',
+            reason: `High-risk context score: ${signals.contextScore} (threshold: ${CONTEXT_SCORE_THRESHOLD})`,
+            normalizedPrompt: normalized,
+            rewrittenPrompt: null,
+            signals,
+        };
+    }
+
+    // 9) If we get here, allow. Optionally mark as rewritten if normalized.
+    const rewritten = normalized !== raw ? normalized : null;
+
     return {
-        allow: false,
-        action: 'BLOCK',
-        reason: `Injection attempt detected: ${injections.join(', ')}`,
+        allow: true,
+        action: 'ALLOW',
+        reason: 'No minor indicators detected',
         normalizedPrompt: normalized,
-        rewrittenPrompt: null,
+        rewrittenPrompt: rewritten,
         signals,
     };
-}
-
-// 2) Any explicit age < 18 → BLOCK
-if (ages.some(age => age < 18)) {
-    return {
-        allow: false,
-        action: 'BLOCK',
-        reason: `Explicit age under 18 detected (severity: ${signals.severity})`,
-        normalizedPrompt: normalized,
-        rewrittenPrompt: null,
-        signals,
-    };
-}
-
-// 3) Any hard term → BLOCK
-if (hardTerms.length > 0) {
-    return {
-        allow: false,
-        action: 'BLOCK',
-        reason: `Minor-implying term(s): ${hardTerms.join(', ')} (severity: ${signals.severity})`,
-        normalizedPrompt: normalized,
-        rewrittenPrompt: null,
-        signals,
-    };
-}
-
-// 4) Cross-sentence detection → BLOCK
-if (crossSentence.length > 0) {
-    return {
-        allow: false,
-        action: 'BLOCK',
-        reason: `Cross-sentence evasion detected: ${crossSentence.join(', ')} (severity: ${signals.severity})`,
-        normalizedPrompt: normalized,
-        rewrittenPrompt: null,
-        signals,
-    };
-}
-
-// 5) Fuzzy matches for obfuscated content → BLOCK
-if (fuzzyMatches.length > 0) {
-    const topMatch = fuzzyMatches[0];
-    return {
-        allow: false,
-        action: 'BLOCK',
-        reason: `Obfuscated content detected: "${topMatch.window}" matches "${topMatch.term}" (${topMatch.matchType}, confidence: ${topMatch.confidence.toFixed(2)})`,
-        normalizedPrompt: normalized,
-        rewrittenPrompt: null,
-        signals,
-    };
-}
-
-// 6) K-12 contexts → BLOCK
-if (schoolContext.length > 0) {
-    return {
-        allow: false,
-        action: 'BLOCK',
-        reason: `K-12 school context implies minor (severity: ${signals.severity})`,
-        normalizedPrompt: normalized,
-        rewrittenPrompt: null,
-        signals,
-    };
-}
-
-// 7) Ambiguous youth descriptors: BLOCK regardless (strict policy)
-if (ambiguousYouth.length > 0) {
-    return {
-        allow: false,
-        action: 'BLOCK',
-        reason: `Ambiguous youth descriptor present (severity: ${signals.severity})`,
-        normalizedPrompt: normalized,
-        rewrittenPrompt: null,
-        signals,
-    };
-}
-
-// 8) Context score threshold check
-if (signals.contextScore >= CONTEXT_SCORE_THRESHOLD) {
-    return {
-        allow: false,
-        action: 'BLOCK',
-        reason: `High-risk context score: ${signals.contextScore} (threshold: ${CONTEXT_SCORE_THRESHOLD})`,
-        normalizedPrompt: normalized,
-        rewrittenPrompt: null,
-        signals,
-    };
-}
-
-// 9) If we get here, allow. Optionally mark as rewritten if normalized.
-const rewritten = normalized !== raw ? normalized : null;
-
-return {
-    allow: true,
-    action: 'ALLOW',
-    reason: 'No minor indicators detected',
-    normalizedPrompt: normalized,
-    rewrittenPrompt: rewritten,
-    signals,
-};
 }
 
 /**

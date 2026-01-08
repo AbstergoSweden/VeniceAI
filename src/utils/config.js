@@ -11,10 +11,11 @@ import { maskSensitive } from './validation.js';
  */
 const validateApiKeys = (keys) => {
     if (!keys || keys.length === 0) {
-        throw new Error(
-            'No API keys configured. Please set VITE_VENICE_API_KEYS in your .env file. ' +
+        console.warn(
+            '[Config] No API keys configured. Please set VITE_VENICE_API_KEYS in your .env file. ' +
             'See .env.example for configuration details.'
         );
+        return []; // Return empty array, let UI handle the configuration prompt
     }
 
     // Check for placeholder/invalid keys
@@ -26,10 +27,11 @@ const validateApiKeys = (keys) => {
     });
 
     if (validKeys.length === 0) {
-        throw new Error(
-            'No valid API keys found. API keys appear to be placeholder values. ' +
+        console.warn(
+            '[Config] No valid API keys found. API keys appear to be placeholder values. ' +
             'Please configure real API keys from https://venice.ai'
         );
+        return []; // Return empty array, let UI handle the configuration prompt
     }
 
     if (import.meta.env.DEV && validKeys.length !== keys.length) {

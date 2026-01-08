@@ -103,48 +103,70 @@ const DEFAULT_CHAT_MODEL = DEFAULT_CHAT_MODELS[0]?.id || 'mistral-31-24b';
 
 // --- FIREBASE INITIALIZATION ---
 let firebaseConfig, appId;
+let firebaseEnabled = true;
 
 if (typeof __firebase_config === 'undefined') {
-    throw new Error("Firebase configuration is required but not provided. Please configure firebase in vite.config.js or build process.");
+    console.warn("[Firebase] Configuration not provided. Running in local-only mode.");
+    firebaseEnabled = false;
+    firebaseConfig = {};
 } else {
     try {
         firebaseConfig = typeof __firebase_config === 'string'
             ? JSON.parse(__firebase_config)
             : __firebase_config;
+
+        // Check if config is mock/placeholder
+        if (firebaseConfig.apiKey?.includes('MOCK') ||
+            firebaseConfig.projectId === 'demo-project' ||
+            !firebaseConfig.apiKey) {
+            console.warn("[Firebase] Mock/placeholder config detected. Running in local-only mode.");
+            firebaseEnabled = false;
+        }
     } catch {
-        throw new Error("Invalid Firebase configuration format. Please ensure __firebase_config contains valid JSON.");
+        console.warn("[Firebase] Invalid configuration format. Running in local-only mode.");
+        firebaseEnabled = false;
+        firebaseConfig = {};
     }
 }
 
 appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-let app, auth, db;
-try {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
+let app = null, auth = null, db = null;
 
-    // Initialize App Check for production
-    if (!import.meta.env.DEV) {
-        try {
-            initializeAppCheck(app, {
-                provider: new ReCaptchaV3Provider(firebaseConfig.recaptchaSiteKey || 'DEFAULT_SITE_KEY'),
-                isTokenAutoRefreshEnabled: true
-            });
-            console.log('[Security] App Check initialized');
-        } catch (appCheckError) {
-            console.warn('[Security] App Check initialization failed:', appCheckError);
+if (firebaseEnabled) {
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        // Initialize App Check for production (only if we have a real site key)
+        if (!import.meta.env.DEV && firebaseConfig.recaptchaSiteKey) {
+            try {
+                initializeAppCheck(app, {
+                    provider: new ReCaptchaV3Provider(firebaseConfig.recaptchaSiteKey),
+                    isTokenAutoRefreshEnabled: true
+                });
+                console.log('[Security] App Check initialized');
+            } catch (appCheckError) {
+                console.warn('[Security] App Check initialization failed:', appCheckError);
+            }
+        } else if (import.meta.env.DEV) {
+            // In development, use debug token
+            if (typeof self !== 'undefined') {
+                self.FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN || true;
+            }
+            console.log('[Security] Running in development mode - App Check debug mode enabled');
         }
-    } else {
-        // In development, use debug token
-        if (typeof self !== 'undefined') {
-            self.FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN || true;
-        }
-        console.log('[Security] Running in development mode - App Check debug mode enabled');
+    } catch (e) {
+        console.error("[Firebase] Initialization failed:", e);
+        console.warn("[Firebase] Running in local-only mode.");
+        firebaseEnabled = false;
+        app = null;
+        auth = null;
+        db = null;
     }
-} catch (e) {
-    console.error("Firebase initialization failed:", e);
-    throw e;
+} else {
+    console.log('[App] Running in local-only mode (no cloud sync)');
 }
 
 const AppContent = () => {
@@ -237,6 +259,13 @@ const AppContent = () => {
 
     // 1. Auth
     useEffect(() => {
+        // Skip auth initialization if Firebase is not configured
+        if (!auth) {
+            console.log('[Auth] Running in local-only mode - no authentication');
+            setUser({ uid: 'local-user', isAnonymous: true, offline: true });
+            return;
+        }
+
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -317,8 +346,10 @@ const AppContent = () => {
     // 3. Firestore Listener with Pagination
     useEffect(() => {
         if (!user) return;
-        if (user.offline || !navigator.onLine) {
-            showToast("Running in offline mode - history is local only", 'info');
+        if (!db || user.offline || !navigator.onLine) {
+            if (user.offline || !db) {
+                showToast("Running in offline mode - history is local only", 'info');
+            }
             return;
         }
 
@@ -370,6 +401,14 @@ const AppContent = () => {
 
     const clearHistory = async () => {
         if (!window.confirm("Are you sure you want to delete all history?")) return;
+
+        // If no Firebase, just clear local state
+        if (!db || user?.offline) {
+            setHistory([]);
+            showToast("Local history cleared", 'success');
+            return;
+        }
+
         try {
             const collectionPath = `artifacts/${appId}/users/${user.uid}/${CONFIG.COLLECTION_NAME}`;
             const colRef = collection(db, ...collectionPath.split('/'));
@@ -523,6 +562,7 @@ const AppContent = () => {
                             <ImageGallery
                                 images={history}
                                 isGenerating={generating}
+                                generatingCount={variants}
                                 onDownload={downloadImage}
                                 onEnhance={handleOpenEnhance}
                                 onLoadMore={loadMoreHistory}

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Wand2 } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import Skeleton from '../../../components/ui/Skeleton';
+import { setContentGuardBypass, getContentGuardBypass } from '../../../utils/contentGuard';
 
 const SYSTEM_PROMPT_KEY = 'venice-system-prompt';
 const DEFAULT_SYSTEM_PROMPT = 'You are a helpful AI assistant.';
@@ -174,6 +175,20 @@ const ChatPanel = ({
 
     const handleSend = async (userMessage) => {
         if (!userMessage.trim()) return;
+
+        // DEV MODE COMMAND INTERCEPTION
+        if (userMessage.trim() === '/devmode') {
+            const currentState = getContentGuardBypass();
+            setContentGuardBypass(!currentState);
+            const newState = !currentState;
+
+            setChatHistory(prev => [
+                ...prev,
+                { role: 'user', content: '/devmode' },
+                { role: 'assistant', content: `🛡️ **Content Guard Dev Mode**: ${newState ? 'ENABLED (Bypass Active)' : 'DISABLED (Guard Active)'}` }
+            ]);
+            return;
+        }
 
         setLoading(true);
         try {

@@ -102,5 +102,65 @@ export const GallerySkeleton = ({ count = 6 }) => {
   );
 };
 
-export default Skeleton;
+/**
+ * Skeleton for chat messages.
+ */
+export const ChatMessageSkeleton = ({ isUser = false }) => {
+  return (
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div className={`max-w-[80%] ${isUser ? 'bg-primary/20' : 'bg-surface/40'} rounded-2xl p-4`}>
+        <div className="space-y-2">
+          <Skeleton variant="text" height="14px" className="w-48" />
+          <Skeleton variant="text" height="14px" className="w-36" />
+          {!isUser && <Skeleton variant="text" height="14px" className="w-24" />}
+        </div>
+      </div>
+    </div>
+  );
+};
 
+/**
+ * Skeleton for chat loading state.
+ */
+export const ChatSkeleton = () => {
+  return (
+    <div className="space-y-4 p-4">
+      <ChatMessageSkeleton isUser={false} />
+      <ChatMessageSkeleton isUser={true} />
+      <ChatMessageSkeleton isUser={false} />
+    </div>
+  );
+};
+
+/**
+ * Skeleton for model/style selectors.
+ */
+export const ModelSelectorSkeleton = () => {
+  return (
+    <div className="space-y-2">
+      <Skeleton variant="text" height="12px" className="w-16" />
+      <Skeleton variant="rectangular" height="40px" className="w-full rounded-xl" />
+    </div>
+  );
+};
+
+/**
+ * Skeleton for generating image placeholder.
+ */
+export const GeneratingImageSkeleton = () => {
+  return (
+    <div className="aspect-square rounded-2xl overflow-hidden bg-surface-container border border-white/5">
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <Skeleton variant="rectangular" className="w-full h-full" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <Skeleton variant="circular" width="48px" height="48px" className="mx-auto mb-4" />
+            <Skeleton variant="text" height="14px" className="w-24 mx-auto" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Skeleton;

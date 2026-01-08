@@ -35,14 +35,20 @@ function createWindow() {
         return { action: 'allow' };
     });
 
-    // Open DevTools in dev mode
+    // Open DevTools in dev mode only
     if (isDev) {
         mainWindow.webContents.openDevTools();
     }
 
-    // Check for updates in production mode only
+    // Check for updates in production mode only (safely)
     if (!isDev) {
-        autoUpdater.checkForUpdatesAndNotify();
+        try {
+            autoUpdater.checkForUpdatesAndNotify().catch(err => {
+                console.warn('[Electron] Auto-update check failed (non-fatal):', err.message);
+            });
+        } catch (err) {
+            console.warn('[Electron] Auto-updater initialization failed:', err.message);
+        }
     }
 }
 
