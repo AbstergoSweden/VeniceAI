@@ -1,0 +1,380 @@
+---
+# Venice.ai Provider Configuration
+# Generated: 2026-01-08T00:26:06+00:00 (UTC)
+# Models: 23
+
+providers:
+  - id: venice
+    name: Venice.ai
+    base_url: https://api.venice.ai/api/v1
+    api_keys:
+      openai: ${VENICE_API_KEY}
+    models:
+
+      # Claude Opus 4.5 - Vision, Reasoning, Tools, Web Search, Code, Structured Output
+      - id: claude-opus-45
+        name: "Claude Opus 4.5"
+        type: text
+        context: 202752
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: true }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: true }
+          response_schema: { supported: true }
+        # pricing: $6.00/M in / $30.00/M out
+
+      # DeepSeek V3.2 - Reasoning, Web Search
+      - id: deepseek-v3.2
+        name: "DeepSeek V3.2"
+        type: text
+        context: 163840
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 1.0 }
+          vision: { supported: false }
+          tools: { supported: false }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: false }
+          response_schema: { supported: false }
+        # pricing: $0.40/M in / $1.00/M out
+
+      # Gemini 3 Flash Preview - Vision, Reasoning, Tools, Web Search, Structured Output
+      - id: gemini-3-flash-preview
+        name: "Gemini 3 Flash Preview"
+        type: text
+        context: 262144
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 1.0 }
+          vision: { supported: true }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.70/M in / $3.75/M out
+
+      # Gemini 3 Pro Preview - Vision, Reasoning, Tools, Web Search, Structured Output
+      - id: gemini-3-pro-preview
+        name: "Gemini 3 Pro Preview"
+        type: text
+        context: 202752
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: true }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $2.50/M in / $15.00/M out
+
+      # Google Gemma 3 27B Instruct - Vision, Tools, Web Search, Structured Output
+      - id: google-gemma-3-27b-it
+        name: "Google Gemma 3 27B Instruct"
+        type: text
+        context: 202752
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: true }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.12/M in / $0.20/M out
+
+      # Grok 4.1 Fast - Vision, Reasoning, Tools, Web Search, Structured Output
+      - id: grok-41-fast
+        name: "Grok 4.1 Fast"
+        type: text
+        context: 262144
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: true }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.50/M in / $1.25/M out
+
+      # Grok Code Fast 1 - Reasoning, Tools, Web Search, Code, Structured Output
+      - id: grok-code-fast-1
+        name: "Grok Code Fast 1"
+        type: text
+        context: 262144
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: true }
+          response_schema: { supported: true }
+        # pricing: $0.25/M in / $1.87/M out
+
+      # Hermes 3 Llama 3.1 405b - Web Search
+      - id: hermes-3-llama-3.1-405b
+        name: "Hermes 3 Llama 3.1 405b"
+        type: text
+        context: 131072
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: false }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: false }
+        # pricing: $1.10/M in / $3.00/M out
+
+      # Kimi K2 Thinking - Reasoning, Tools, Web Search, Code, Structured Output
+      - id: kimi-k2-thinking
+        name: "Kimi K2 Thinking"
+        type: text
+        context: 262144
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: true }
+          response_schema: { supported: true }
+        # pricing: $0.75/M in / $3.20/M out
+
+      # Llama 3.2 3B - Tools, Web Search, Structured Output
+      - id: llama-3.2-3b
+        name: "Llama 3.2 3B"
+        type: text
+        context: 131072
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.6 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.15/M in / $0.60/M out
+
+      # Llama 3.3 70B - Tools, Web Search
+      - id: llama-3.3-70b
+        name: "Llama 3.3 70B"
+        type: text
+        context: 131072
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.6 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: false }
+        # pricing: $0.70/M in / $2.80/M out
+
+      # MiniMax M2.1 - Reasoning, Tools, Web Search, Code, Structured Output
+      - id: minimax-m21
+        name: "MiniMax M2.1"
+        type: text
+        context: 202752
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: true }
+          response_schema: { supported: true }
+        # pricing: $0.40/M in / $1.60/M out
+
+      # Venice Medium - Vision, Tools, Web Search, Structured Output
+      - id: mistral-31-24b
+        name: "Venice Medium"
+        type: text
+        context: 131072
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.15 }
+          vision: { supported: true }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.50/M in / $2.00/M out
+
+      # GPT-5.2 - Reasoning, Tools, Web Search, Structured Output
+      - id: openai-gpt-52
+        name: "GPT-5.2"
+        type: text
+        context: 262144
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $2.19/M in / $17.50/M out
+
+      # OpenAI GPT OSS 120B - Tools, Web Search
+      - id: openai-gpt-oss-120b
+        name: "OpenAI GPT OSS 120B"
+        type: text
+        context: 131072
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: false }
+        # pricing: $0.07/M in / $0.30/M out
+
+      # Qwen 3 235B A22B Instruct 2507 - Tools, Web Search, Structured Output
+      - id: qwen3-235b-a22b-instruct-2507
+        name: "Qwen 3 235B A22B Instruct 2507"
+        type: text
+        context: 131072
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.15/M in / $0.75/M out
+
+      # Qwen 3 235B A22B Thinking 2507 - Reasoning, Tools, Web Search, Structured Output
+      - id: qwen3-235b-a22b-thinking-2507
+        name: "Qwen 3 235B A22B Thinking 2507"
+        type: text
+        context: 131072
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.6 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.45/M in / $3.50/M out
+
+      # Venice Small - Reasoning, Tools, Web Search, Structured Output
+      - id: qwen3-4b
+        name: "Venice Small"
+        type: text
+        context: 32768
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.6 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.05/M in / $0.15/M out
+
+      # Qwen 3 Coder 480b - Tools, Web Search, Code, Structured Output
+      - id: qwen3-coder-480b-a35b-instruct
+        name: "Qwen 3 Coder 480b"
+        type: text
+        context: 262144
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: true }
+          response_schema: { supported: true }
+        # pricing: $0.75/M in / $3.00/M out
+
+      # Qwen 3 Next 80b - Tools, Web Search, Structured Output
+      - id: qwen3-next-80b
+        name: "Qwen 3 Next 80b"
+        type: text
+        context: 262144
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.35/M in / $1.90/M out
+
+      # Venice Uncensored 1.1 - Web Search, Structured Output
+      - id: venice-uncensored
+        name: "Venice Uncensored 1.1"
+        type: text
+        context: 32768
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: false }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.20/M in / $0.90/M out
+
+      # GLM 4.6 - Tools, Web Search, Structured Output
+      - id: zai-org-glm-4.6
+        name: "GLM 4.6"
+        type: text
+        context: 202752
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 0.7 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: false }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.85/M in / $2.75/M out
+
+      # GLM 4.7 - Reasoning, Tools, Web Search, Structured Output
+      - id: zai-org-glm-4.7
+        name: "GLM 4.7"
+        type: text
+        context: 202752
+        provider: venice
+        abilities:
+          temperature: { supported: true, default: 1.0 }
+          vision: { supported: false }
+          tools: { supported: true }
+          web_search: { supported: true }
+          reasoning: { supported: true }
+          code_optimized: { supported: false }
+          response_schema: { supported: true }
+        # pricing: $0.55/M in / $2.65/M out

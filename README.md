@@ -1,5 +1,9 @@
 # Venice.ai Generator
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
+
 A high-fidelity, uncensored AI image generator with persistent history, chat features, and Web3 transactions. Built with React, Electron, Firebase, and the Venice.ai API.
 
 ![Venice.ai Generator](https://preview.redd.it/73z6v668xffc1.jpeg?width=1055&format=pjpg&auto=webp&s=b15ae1f6d53d93bf004d8bbff24d5135026bbd2d)
@@ -58,10 +62,19 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 | **Code Quality** | ESLint 9, Prettier |
 
 ---
+
 ```
 ## Project Tree
 
 .
+├── .github
+│   ├── ISSUE_TEMPLATE
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   ├── CODEOWNERS
+│   └── pull_request_template.md
+├── CHANGELOG.md
+├── CITATION.cff
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── README.md
@@ -79,8 +92,12 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 ├── package.json
 ├── playwright.config.js
 ├── postcss.config.js
+├── providers.yaml
 ├── public
 │   └── vite.svg
+├── scripts
+│   ├── jules_editor.sh
+│   └── venice_model_sync.py
 ├── src
 │   ├── App.jsx
 │   ├── App.test.jsx
@@ -104,6 +121,7 @@ A high-fidelity, uncensored AI image generator with persistent history, chat fea
 ├── vite.config.js
 └── vitest.config.js
 ```
+
 ---
 
 ## Configuration

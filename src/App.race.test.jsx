@@ -100,13 +100,13 @@ describe('Image Generation Race Condition Fix', () => {
     vi.clearAllMocks();
 
     // Default implementation handles config calls and generation
-    apiCall.mockImplementation(async (url, data) => {
-        if (url.includes('/models')) return MOCK_MODELS;
-        if (url.includes('/styles')) return MOCK_STYLES;
-        // Default generation response
-        return {
-            images: ['data:image/png;base64,placeholder']
-        };
+    apiCall.mockImplementation(async (url) => {
+      if (url.includes('/models')) return MOCK_MODELS;
+      if (url.includes('/styles')) return MOCK_STYLES;
+      // Default generation response
+      return {
+        images: ['data:image/png;base64,placeholder']
+      };
     });
   });
 
@@ -121,19 +121,19 @@ describe('Image Generation Race Condition Fix', () => {
       if (url.includes('/models')) return MOCK_MODELS;
       if (url.includes('/styles')) return MOCK_STYLES;
       if (url.includes('/generate')) {
-          // Extract seed to determine delay and response content
-          const seed = data.seed;
-          let delay = 0;
+        // Extract seed to determine delay and response content
+        const seed = data.seed;
+        let delay = 0;
 
-          if (seed % 3 === 0) delay = 100;      // Slowest
-          if (seed % 3 === 1) delay = 10;       // Fastest
-          if (seed % 3 === 2) delay = 50;       // Medium
+        if (seed % 3 === 0) delay = 100;      // Slowest
+        if (seed % 3 === 1) delay = 10;       // Fastest
+        if (seed % 3 === 2) delay = 50;       // Medium
 
-          await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise(resolve => setTimeout(resolve, delay));
 
-          return {
-            images: [`image-data-for-seed-${seed}`]
-          };
+        return {
+          images: [`image-data-for-seed-${seed}`]
+        };
       }
       return {};
     });
@@ -185,7 +185,7 @@ describe('Image Generation Race Condition Fix', () => {
       if (url.includes('/styles')) return MOCK_STYLES;
       if (url.includes('/generate')) {
         return {
-            images: [`image-result-${data.seed}`]
+          images: [`image-result-${data.seed}`]
         };
       }
       return {};
@@ -218,8 +218,8 @@ describe('Image Generation Race Condition Fix', () => {
 
     // Verify mapping
     calls.forEach((call) => {
-        const item = call[1];
-        expect(item.base64).toBe(`image-result-${item.params.seed}`);
+      const item = call[1];
+      expect(item.base64).toBe(`image-result-${item.params.seed}`);
     });
   });
 
@@ -228,20 +228,20 @@ describe('Image Generation Race Condition Fix', () => {
 
     let callCount = 0;
     apiCall.mockImplementation(async (url, data) => {
-        if (url.includes('/models')) return MOCK_MODELS;
-        if (url.includes('/styles')) return MOCK_STYLES;
-        if (url.includes('/generate')) {
-            callCount++;
-            // The calls happen sequentially in the loop start, but are awaited in parallel.
-            // callCount 2 corresponds to the second call made (2nd variant).
-            if (callCount === 2) {
-                throw new Error('Simulated API Failure');
-            }
-            return {
-                images: [`success-${data.seed}`]
-            };
+      if (url.includes('/models')) return MOCK_MODELS;
+      if (url.includes('/styles')) return MOCK_STYLES;
+      if (url.includes('/generate')) {
+        callCount++;
+        // The calls happen sequentially in the loop start, but are awaited in parallel.
+        // callCount 2 corresponds to the second call made (2nd variant).
+        if (callCount === 2) {
+          throw new Error('Simulated API Failure');
         }
-        return {};
+        return {
+          images: [`success-${data.seed}`]
+        };
+      }
+      return {};
     });
 
     render(<App />);
@@ -268,7 +268,7 @@ describe('Image Generation Race Condition Fix', () => {
     // Since callCount 2 failed, that was the second iteration (i=1, seed=base+1).
     // So we expect seed=base+0 and seed=base+2 to be saved.
 
-    const seeds = calls.map(c => c[1].params.seed).sort((a,b) => a - b);
+    const seeds = calls.map(c => c[1].params.seed).sort((a, b) => a - b);
 
     // The difference between the two seeds should be 2 (because the middle one is missing)
     expect(seeds.length).toBe(2);
@@ -276,8 +276,8 @@ describe('Image Generation Race Condition Fix', () => {
 
     // Verify content
     calls.forEach(call => {
-        const item = call[1];
-        expect(item.base64).toBe(`success-${item.params.seed}`);
+      const item = call[1];
+      expect(item.base64).toBe(`success-${item.params.seed}`);
     });
   });
 });

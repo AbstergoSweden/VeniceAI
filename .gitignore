@@ -32,6 +32,7 @@ app/dist/
 *secrets*
 firebase-config.js
 *-config.private.js
+providers.local.yaml
 
 # -----------------------------
 # Logs
