@@ -27,6 +27,9 @@
     "url": "https://github.com/your-username/venice-generator/issues"
   },
   "homepage": "https://github.com/your-username/venice-generator#readme",
+  "overrides": {
+    "tar": "^7.5.3"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
